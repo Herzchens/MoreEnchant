@@ -1,0 +1,29 @@
+name: VirtualExplosion
+version: 1.0
+main: com.herzchen.virtualexplosion.VirtualExplosion
+api-version: 1.16
+description: Virtual Explosion Plugin
+author: Herzchen
+
+commands:
+  ve:
+    description: Virtual Explosion commands
+    usage: /ve <enchant|unenchant|reload> [level]
+    permission: virtualexplosion.use
+
+permissions:
+  virtualexplosion.enchant:
+    description: Allows using enchant and unenchant commands
+    default: op
+  virtualexplosion.reload:
+    description: Allows reloading the config
+    default: op
+  virtualexplosion.use:
+    description: Allows using the main command
+    default: true
+  oregen.level.1:
+    description: Access to level 1 ore generation
+    default: true
+  oregen.level.2:
+    description: Access to level 2 ore generation
+    default: op

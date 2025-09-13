@@ -5,6 +5,7 @@ import org.bukkit.inventory.ItemStack
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 
 class EnchantManager {
@@ -19,7 +20,8 @@ class EnchantManager {
 
         removeEnchantLore(lore)
 
-        val newLine: Component = Component.text("$vePrefixPlain$shapeKey", NamedTextColor.BLUE)
+        val newLine: Component = Component.text("$vePrefixPlain$shapeKey", NamedTextColor.RED)
+            .decoration(TextDecoration.ITALIC, false)
         lore.add(newLine)
 
         meta.lore(lore)

@@ -191,12 +191,6 @@ Mình rất hoan nghênh Pull Request và Issue! Vui lòng:
 
 ---
 
-## 📝 Changelog
-
-Ghi chú thay đổi được duy trì trong `CHANGELOG.md`.
-
----
-
 ## 📄 License
 
 Đọc file `LICENSE` để biết thêm thông tin chi tiết.

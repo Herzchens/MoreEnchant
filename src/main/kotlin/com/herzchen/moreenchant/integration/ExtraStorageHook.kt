@@ -32,15 +32,9 @@ class ExtraStorageHook(private val plugin: MoreEnchant) {
 
             val getUsedSpaceMethod = storage.javaClass.getMethod("getUsedSpace")
             val getSpaceMethod = storage.javaClass.getMethod("getSpace")
-            val isMaxSpaceMethod = storage.javaClass.getMethod("isMaxSpace")
 
             val used = getUsedSpaceMethod.invoke(storage) as Long
             val capacity = getSpaceMethod.invoke(storage) as Long
-            val isMaxSpace = isMaxSpaceMethod.invoke(storage) as Boolean
-
-            if (isMaxSpace && used >= capacity) {
-                return Pair(used, Long.MAX_VALUE)
-            }
 
             Pair(used, capacity)
         } catch (e: Exception) {

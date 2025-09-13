@@ -9,7 +9,12 @@ import org.bukkit.event.player.PlayerSwapHandItemsEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 
+import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+
 class PlayerItemChangeListener(private val plugin: MoreEnchant) : Listener {
+    private val lastUpdateTime = ConcurrentHashMap<UUID, Long>()
+    private val debounceTime = 100L
 
     @EventHandler
     fun onItemHeldChange(event: PlayerItemHeldEvent) {
@@ -23,12 +28,14 @@ class PlayerItemChangeListener(private val plugin: MoreEnchant) : Listener {
 
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
+        lastUpdateTime.remove(event.player.uniqueId)
         updateBossBarForPlayer(event.player)
     }
 
     @EventHandler
     fun onPlayerQuit(event: PlayerQuitEvent) {
         plugin.bossBarManager.hideBossBar(event.player)
+        lastUpdateTime.remove(event.player.uniqueId)
     }
 
     private fun isHoldingEnchantedTool(player: org.bukkit.entity.Player): Boolean {
@@ -37,6 +44,13 @@ class PlayerItemChangeListener(private val plugin: MoreEnchant) : Listener {
     }
 
     private fun updateBossBarForPlayer(player: org.bukkit.entity.Player) {
+        val currentTime = System.currentTimeMillis()
+        val lastTime = lastUpdateTime.getOrDefault(player.uniqueId, 0L)
+        if (currentTime - lastTime < debounceTime) {
+            return
+        }
+        lastUpdateTime[player.uniqueId] = currentTime
+
         if (isHoldingEnchantedTool(player)) {
             val shouldPauseDueToStorage = plugin.extraStorageHook.isAvailable() &&
                     plugin.extraStorageHook.hasAutoPickup(player) &&
@@ -49,7 +63,7 @@ class PlayerItemChangeListener(private val plugin: MoreEnchant) : Listener {
                 return
             }
 
-            val isPaused = plugin.virtualExplosionManager.shouldPauseExplosion(player.location)
+            val isPaused = plugin.virtualExplosionManager.shouldPauseExplosion(player)
             if (isPaused) {
                 plugin.bossBarManager.showBossBar(player,
                     "§cNổ ảo đã bị tạm dừng, vui lòng dọn dẹp vật phẩm xung quanh bạn!",

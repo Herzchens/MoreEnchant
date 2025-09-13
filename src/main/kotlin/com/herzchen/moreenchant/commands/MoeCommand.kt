@@ -23,15 +23,9 @@ class MoeCommand (plugin: MoreEnchant) : CommandExecutor {
 
         when (args[0].lowercase()) {
             "enchant" -> handleEnchant(sender, args)
-            "disenchant" -> handleDisenchant(sender)
+            "disenchant" -> handleDisenchant(sender, args)
             "reload" -> handleReload(sender)
-            "help" -> {
-                if (args.size > 1) {
-                    Helper.showHelp(sender)
-                } else {
-                    Helper.showHelp(sender)
-                }
-            }
+            "help" -> Helper.showHelp(sender)
             else -> return false
         }
         return true
@@ -49,27 +43,41 @@ class MoeCommand (plugin: MoreEnchant) : CommandExecutor {
         }
 
         if (args.size < 2) {
-            sender.sendMessage("§eUsage: /moe enchant <shape>")
-            sender.sendMessage("§6Available shapes: ${config.explosionShapes.keys.joinToString()}")
+            sender.sendMessage("§eUsage: /moe enchant <enchantment> [level]")
+            sender.sendMessage("§6Available enchantments: virtualexplosion")
             return
         }
 
-        val shapeKey = args[1]
-        if (config.explosionShapes[shapeKey] == null) {
-            sender.sendMessage("§cShape không tồn tại!")
-            sender.sendMessage("§6Available shapes: ${config.explosionShapes.keys.joinToString()}")
+        val enchantmentName = args[1].lowercase()
+
+        if (enchantmentName != "virtualexplosion") {
+            sender.sendMessage("§cEnchantment không tồn tại!")
+            sender.sendMessage("§6Available enchantments: virtualexplosion")
+            return
+        }
+
+        if (args.size < 3) {
+            sender.sendMessage("§eUsage: /moe enchant virtualexplosion <level>")
+            sender.sendMessage("§6Available levels: ${config.explosionShapes.keys.joinToString()}")
+            return
+        }
+
+        val level = args[2]
+        if (config.explosionShapes[level] == null) {
+            sender.sendMessage("§cLevel không tồn tại!")
+            sender.sendMessage("§6Available levels: ${config.explosionShapes.keys.joinToString()}")
             return
         }
 
         val item = sender.inventory.itemInMainHand
-        if (enchantManager.addEnchant(item, shapeKey)) {
-            sender.sendMessage("§aĐã thêm phù phép Virtual Explosion ($shapeKey)!")
+        if (enchantManager.addEnchant(item, level)) {
+            sender.sendMessage("§aĐã thêm phù phép Virtual Explosion ($level)!")
         } else {
             sender.sendMessage("§cKhông thể thêm phù phép vào vật phẩm này!")
         }
     }
 
-    private fun handleDisenchant(sender: CommandSender) {
+    private fun handleDisenchant(sender: CommandSender, args: Array<out String>) {
         if (sender !is Player) {
             sender.sendMessage("Chỉ người chơi có thể dùng lệnh này")
             return
@@ -78,6 +86,14 @@ class MoeCommand (plugin: MoreEnchant) : CommandExecutor {
         if (!sender.hasPermission("moreenchant.enchant")) {
             sender.sendMessage("§cBạn không có quyền sử dụng lệnh này!")
             return
+        }
+
+        if (args.size > 1) {
+            val enchantmentName = args[1].lowercase()
+            if (enchantmentName != "virtualexplosion") {
+                sender.sendMessage("§cEnchantment không tồn tại!")
+                return
+            }
         }
 
         val item = sender.inventory.itemInMainHand

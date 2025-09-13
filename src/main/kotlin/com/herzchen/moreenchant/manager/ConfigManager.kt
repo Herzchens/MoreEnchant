@@ -20,7 +20,8 @@ class ConfigManager(private val plugin: JavaPlugin) {
 
     data class DropGroup(
         val permission: String,
-        val drops: Map<Material, Double>
+        val drops: Map<Material, Double>,
+        val cumulativeWeights: List<Pair<Material, Double>>
     )
 
     private val _explosionShapes = mutableMapOf<String, ExplosionShape>()
@@ -110,7 +111,14 @@ class ConfigManager(private val plugin: JavaPlugin) {
                 }
             }
 
-            _dropGroups[groupKey] = DropGroup(permission, dropsMap)
+            dropsMap.values.sum()
+            var cumulative = 0.0
+            val cumulativeWeights = dropsMap.map { (material, weight) ->
+                cumulative += weight
+                material to cumulative
+            }
+
+            _dropGroups[groupKey] = DropGroup(permission, dropsMap, cumulativeWeights)
         }
     }
 

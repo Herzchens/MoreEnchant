@@ -1,25 +1,47 @@
 plugins {
     id("java")
-    id("org.jetbrains.kotlin.jvm") version "1.6.21"
+    id("org.jetbrains.kotlin.jvm") version "1.9.22"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "com.herzchen"
-version = "1.0"
+version = "1.1"
 
 repositories {
     mavenCentral()
-    maven { url = uri("https://hub.spigotmc.org/nexus/content/repositories/snapshots/") }
-    maven { url = uri("https://repo.dmulloy2.net/repository/public/") }
+    maven("https://maven.enginehub.org/repo/")
+    maven("https://repo.papermc.io/repository/maven-public/")
 }
 
 dependencies {
-    compileOnly("org.spigotmc:spigot-api:1.18.2-R0.1-SNAPSHOT")
-    compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.7")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
+    compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.9")
+    implementation(kotlin("stdlib-jdk8"))
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "1.8"
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    kotlinOptions.jvmTarget = "1.8"
+}
+
+tasks {
+    compileKotlin {
+        kotlinOptions.jvmTarget = "17"
+    }
+    compileJava {
+        targetCompatibility = "17"
+    }
+}
+
+sourceSets {
+    main {
+        java.srcDirs("src/main/kotlin")
+    }
+}
+
+tasks {
+    shadowJar {
+        archiveClassifier.set("")
+        manifest.attributes["Main-Class"] = "com.herzchen.moreenchant.MoreEnchant"
+        exclude("com/sk89q/worldguard/**")
     }
 }

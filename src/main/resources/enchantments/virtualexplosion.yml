@@ -1,0 +1,74 @@
+# Cấu hình phạm vi
+explosion_shapes:
+  I:
+    width: 3
+    height: 3
+    depth: 1
+    chance: 30.0 # Tỷ lệ trigger nổ
+    cooldown: 1.0 # Giãn cách giữa các lần nổ
+  II:
+    width: 3
+    height: 3
+    depth: 3
+    chance: 50.0
+    cooldown: 0.5
+  III:
+    width: 5
+    height: 3
+    depth: 5
+    chance: 70.0
+    cooldown: 0.2
+  IV:
+    width: 7
+    height: 5
+    depth: 7
+    chance: 90.0
+    cooldown: 0.1
+
+# Tỷ lệ vật phẩm theo permission
+virtual_drops:
+  default: # bảng drop khi người chơi không có bất cứ quyền gì
+    drops:
+      STONE: 100.0
+      LAPIS_LAZULI: 100.0
+      REDSTONE: 50.0
+      GOLD_INGOT: 10.0
+  oregen_level1:
+    permission: "oregen.level.1"
+    drops:
+      STONE: 50.0
+      COAL_ORE: 20.0
+      IRON_ORE: 5.0
+  oregen_level2:
+    permission: "oregen.level.2"
+    drops:
+      STONE: 30.0
+      DIAMOND_ORE: 3.0
+      EMERALD_ORE: 1.0
+
+# Giới hạn số block tối đa để tính toán nổ ảo
+max_blocks: 1000
+
+# Cấu hình chống lag
+anti_lag:
+  max_nearby_items: 100
+  check_radius: 10
+
+block_whitelist: # Những block mà khi đào sẽ trigger nổ
+  - STONE
+  - COAL_ORE
+  - IRON_ORE
+  - GOLD_ORE
+  - DIAMOND_ORE
+  - EMERALD_ORE
+  - REDSTONE_ORE
+  - LAPIS_ORE
+  - NETHER_QUARTZ_ORE
+  - NETHER_GOLD_ORE
+  - DEEPSLATE_COAL_ORE
+  - DEEPSLATE_IRON_ORE
+  - DEEPSLATE_GOLD_ORE
+  - DEEPSLATE_DIAMOND_ORE
+  - DEEPSLATE_EMERALD_ORE
+  - DEEPSLATE_REDSTONE_ORE
+  - DEEPSLATE_LAPIS_ORE

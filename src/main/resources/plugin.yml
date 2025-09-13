@@ -1,29 +1,30 @@
-name: VirtualExplosion
-version: 1.0
-main: com.herzchen.virtualexplosion.VirtualExplosion
-api-version: 1.16
-description: Virtual Explosion Plugin
+name: MoreEnchant
+version: 1.1
+main: com.herzchen.moreenchant.MoreEnchant
+api-version: 1.20
+description: New enchantments for minecraft
+softdepend: [WorldGuard]
 author: Herzchen
 
 commands:
-  ve:
-    description: Virtual Explosion commands
-    usage: /ve <enchant|unenchant|reload> [level]
-    permission: virtualexplosion.use
+  moe:
+    description: MoreEnchant commands
+    usage: /moe <enchant|disenchant|reload|help> [enchantment] [level]
 
 permissions:
-  virtualexplosion.enchant:
-    description: Allows using enchant and unenchant commands
+  moreenchant.*:
+    description: Gives access to all MoreEnchant commands
     default: op
-  virtualexplosion.reload:
+    children:
+      moreenchant.enchant: true
+      moreenchant.disenchant: true
+      moreenchant.reload: true
+  moreenchant.enchant:
+    description: Allows using enchant command
+    default: op
+  moreenchant.disenchant:
+    description: Allows using disenchant command
+    default: op
+  moreenchant.reload:
     description: Allows reloading the config
-    default: op
-  virtualexplosion.use:
-    description: Allows using the main command
-    default: true
-  oregen.level.1:
-    description: Access to level 1 ore generation
-    default: true
-  oregen.level.2:
-    description: Access to level 2 ore generation
     default: op

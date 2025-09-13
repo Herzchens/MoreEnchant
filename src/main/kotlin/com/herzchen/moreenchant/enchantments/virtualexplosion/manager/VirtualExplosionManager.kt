@@ -1,13 +1,13 @@
 package com.herzchen.moreenchant.enchantments.virtualexplosion.manager
 
 import com.herzchen.moreenchant.MoreEnchant
+import com.herzchen.moreenchant.manager.ConfigManager
 
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
-import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
@@ -121,11 +121,10 @@ class VirtualExplosionManager(private val plugin: MoreEnchant) {
             return
         }
 
-
-        val dropRates = permissionManager.getBestDropGroup(player)
+        val dropGroup = permissionManager.getBestDropGroup(player) ?: return
         val fortuneLevel = player.inventory.itemInMainHand.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS)
 
-        val shouldPause = shouldPauseExplosion(centerBlockLocation)
+        val shouldPause = shouldPauseExplosion(player)
 
         plugin.bossBarManager.hideBossBar(player)
 
@@ -137,63 +136,65 @@ class VirtualExplosionManager(private val plugin: MoreEnchant) {
         }
 
         val totalBlocks = min(shape.totalBlocks - 1, config.maxBlocks)
-        val (items, totalExperience) = calculateDropsAndExperience(totalBlocks, dropRates, fortuneLevel)
 
-        plugin.server.scheduler.runTask(plugin, Runnable {
-            val useStorage = extraStorageHook.isAvailable() && extraStorageHook.hasAutoPickup(player)
+        plugin.server.scheduler.runTaskAsynchronously(plugin, Runnable {
+            val (items, totalExperience) = calculateDropsAndExperience(totalBlocks, dropGroup, fortuneLevel)
 
-            if (useStorage) {
-                val (successfulItems, failedItems) = addToExtraStorage(items, player)
+            plugin.server.scheduler.runTask(plugin, Runnable {
+                val useStorage = extraStorageHook.isAvailable() && extraStorageHook.hasAutoPickup(player)
 
-                if (successfulItems.isNotEmpty()) {
-                    showAddedItemsMessage(player, successfulItems)
-                }
-
-                if (failedItems.isNotEmpty()) {
-                    dropItems(failedItems, centerBlockLocation)
-                }
-            } else {
-                dropItems(items, centerBlockLocation)
-            }
-
-            if (totalExperience > 0) {
-                player.giveExp(totalExperience)
-            }
-
-            plugin.bossBarManager.showBossBar(player,
-                "§cNổ Ảo§7: §f${shapeKey} §7(§f+${totalExperience} §aEXP§7)",
-                org.bukkit.boss.BarColor.YELLOW)
-
-            plugin.server.scheduler.runTaskLater(plugin, Runnable {
-                val item = player.inventory.itemInMainHand
-                val hasEnchant = plugin.enchantManager.getEnchantShape(item) != null
-
-                if (hasEnchant) {
-                    val isPaused = shouldPauseExplosion(player.location)
-                    if (isPaused) {
-                        plugin.bossBarManager.showBossBar(player,
-                            "§cNổ ảo đã bị tạm dừng, vui lòng dọn dẹp vật phẩm xung quanh bạn!",
-                            org.bukkit.boss.BarColor.RED)
-                    } else {
-                        plugin.bossBarManager.showBossBar(player,
-                            "§aHiện đang kích hoạt Nổ Ảo",
-                            org.bukkit.boss.BarColor.GREEN)
+                if (useStorage) {
+                    val (successfulItems, failedItems) = addToExtraStorage(items, player)
+                    if (successfulItems.isNotEmpty()) {
+                        showAddedItemsMessage(player, successfulItems)
+                    }
+                    if (failedItems.isNotEmpty()) {
+                        dropItems(failedItems, centerBlockLocation)
                     }
                 } else {
-                    plugin.bossBarManager.hideBossBar(player)
+                    dropItems(items, centerBlockLocation)
                 }
-            }, 20L)
+
+                if (totalExperience > 0) {
+                    player.giveExp(totalExperience)
+                }
+
+                plugin.bossBarManager.showBossBar(player,
+                    "§cNổ Ảo§7: §f${shapeKey} §7(§f+${totalExperience} §aEXP§7)",
+                    org.bukkit.boss.BarColor.YELLOW)
+
+                plugin.server.scheduler.runTaskLater(plugin, Runnable {
+                    val item = player.inventory.itemInMainHand
+                    val hasEnchant = plugin.enchantManager.getEnchantShape(item) != null
+
+                    if (hasEnchant) {
+                        val isPaused = shouldPauseExplosion(player)
+                        if (isPaused) {
+                            plugin.bossBarManager.showBossBar(player,
+                                "§cNổ ảo đã bị tạm dừng, vui lòng dọn dẹp vật phẩm xung quanh bạn!",
+                                org.bukkit.boss.BarColor.RED)
+                        } else {
+                            plugin.bossBarManager.showBossBar(player,
+                                "§aHiện đang kích hoạt Nổ Ảo",
+                                org.bukkit.boss.BarColor.GREEN)
+                        }
+                    } else {
+                        plugin.bossBarManager.hideBossBar(player)
+                    }
+                }, 20L)
+            })
         })
     }
 
     private fun calculateDropsAndExperience(
         blockCount: Int,
-        dropRates: Map<Material, Double>,
+        dropGroup: ConfigManager.DropGroup,
         fortuneLevel: Int
     ): Pair<List<ItemStack>, Int> {
-        if (dropRates.isEmpty()) return Pair(emptyList(), 0)
+        val cumulativeWeights = dropGroup.cumulativeWeights
+        if (cumulativeWeights.isEmpty()) return Pair(emptyList(), 0)
 
-        val totalWeight = dropRates.values.sum()
+        val totalWeight = cumulativeWeights.last().second
         if (totalWeight <= 0) return Pair(emptyList(), 0)
 
         val items = mutableListOf<ItemStack>()
@@ -201,20 +202,26 @@ class VirtualExplosionManager(private val plugin: MoreEnchant) {
 
         repeat(blockCount) {
             val random = Random.Default.nextDouble(0.0, totalWeight)
-            var cumulative = 0.0
-
-            for ((material, weight) in dropRates) {
-                cumulative += weight
-                if (random <= cumulative) {
-                    val amount = calculateDropAmount(material, fortuneLevel)
-                    items.add(ItemStack(material, amount))
-
-                    totalExperience += calculateExperience(material)
-                    break
-                }
-            }
+            val material = findMaterial(cumulativeWeights, random)
+            val amount = calculateDropAmount(material, fortuneLevel)
+            items.add(ItemStack(material, amount))
+            totalExperience += calculateExperience(material)
         }
         return Pair(items, totalExperience)
+    }
+
+    private fun findMaterial(cumulativeWeights: List<Pair<Material, Double>>, random: Double): Material {
+        var low = 0
+        var high = cumulativeWeights.size - 1
+        while (low < high) {
+            val mid = (low + high) / 2
+            if (random < cumulativeWeights[mid].second) {
+                high = mid
+            } else {
+                low = mid + 1
+            }
+        }
+        return cumulativeWeights[low].first
     }
 
     private fun calculateDropAmount(material: Material, fortuneLevel: Int): Int {
@@ -253,17 +260,11 @@ class VirtualExplosionManager(private val plugin: MoreEnchant) {
         }
     }
 
-    fun shouldPauseExplosion(location: Location): Boolean {
+    fun shouldPauseExplosion(player: Player): Boolean {
         val maxItems = config.maxNearbyItems
-        val radius = config.checkRadius
-
         if (maxItems <= 0) return false
-
-        val nearbyItems =
-            location.world?.getNearbyEntities(location, radius.toDouble(), radius.toDouble(), radius.toDouble())
-                ?.count { it is Item } ?: 0
-
-        return nearbyItems >= maxItems
+        val count = plugin.performanceOptimizer.getCachedItemCount(player)
+        return count >= maxItems
     }
 
     private fun addToExtraStorage(items: List<ItemStack>, player: Player): Pair<List<ItemStack>, List<ItemStack>> {

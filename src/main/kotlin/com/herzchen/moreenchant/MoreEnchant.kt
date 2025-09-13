@@ -7,6 +7,8 @@ import com.herzchen.moreenchant.integration.ExtraStorageHook
 import com.herzchen.moreenchant.listener.BlockBreakListener
 import com.herzchen.moreenchant.manager.*
 import com.herzchen.moreenchant.listener.PlayerItemChangeListener
+
+import org.bukkit.event.HandlerList
 import org.bukkit.plugin.java.JavaPlugin
 
 class MoreEnchant : JavaPlugin() {
@@ -16,6 +18,7 @@ class MoreEnchant : JavaPlugin() {
     lateinit var extraStorageHook: ExtraStorageHook
     lateinit var virtualExplosionManager: VirtualExplosionManager
     lateinit var bossBarManager: BossBarManager
+    lateinit var performanceOptimizer: PerformanceOptimizer
 
     private val enableArt = """
         
@@ -48,6 +51,7 @@ class MoreEnchant : JavaPlugin() {
         bossBarManager = BossBarManager()
         extraStorageHook = ExtraStorageHook(this)
         virtualExplosionManager = VirtualExplosionManager(this)
+        performanceOptimizer = PerformanceOptimizer(this)
         server.pluginManager.registerEvents(PlayerItemChangeListener(this), this)
 
 
@@ -57,17 +61,17 @@ class MoreEnchant : JavaPlugin() {
 
         this.server.consoleSender.sendMessage("§b$enableArt")
         this.server.consoleSender.sendMessage("§a================================================================================")
-        this.server.consoleSender.sendMessage("§e>> MoreEnchant v1.0 Enabled!")
-        this.server.consoleSender.sendMessage("§e>> Running on Minecraft ${server.version}")
+        this.server.consoleSender.sendMessage("§e>> MoreEnchant v1.1 Đã bật!")
+        this.server.consoleSender.sendMessage("§e>> Chạy trên phiên bản Minecraft ${server.version}")
 
         checkWorldGuard()
 
-        logger.info("MoreEnchant enabled!")
+        logger.info("MoreEnchant đã bật!")
         server.scheduler.runTask(this, Runnable {
             for (player in server.onlinePlayers) {
                 val item = player.inventory.itemInMainHand
                 if (this@MoreEnchant.enchantManager.getEnchantShape(item) != null) {
-                    val isPaused = virtualExplosionManager.shouldPauseExplosion(player.location)
+                    val isPaused = virtualExplosionManager.shouldPauseExplosion(player)
                     if (isPaused) {
                         bossBarManager.showBossBar(player,
                             "§eNổ ảo đã bị tạm dừng, vui lòng dọn dẹp item xung quanh bạn!",
@@ -84,10 +88,11 @@ class MoreEnchant : JavaPlugin() {
 
     override fun onDisable() {
         bossBarManager.removeAllBossBars()
+        HandlerList.unregisterAll(this)
         this.server.consoleSender.sendMessage("§c$disableArt")
         this.server.consoleSender.sendMessage("§c================================================================================")
-        this.server.consoleSender.sendMessage("§c>> MoreEnchant Disabled!")
-        logger.info("MoreEnchant disabled!")
+        this.server.consoleSender.sendMessage("§c>> MoreEnchant Đã Tắt!")
+        logger.info("MoreEnchant đã tắt!")
     }
 
     private fun checkWorldGuard() {
@@ -100,7 +105,7 @@ class MoreEnchant : JavaPlugin() {
             logger.warning("Hãy cài đặt WorldGuard để sử dụng tính năng bảo vệ")
             logger.warning("================================================")
         } else {
-            logger.info("WorldGuard detected! Protected regions will be respected.")
+            logger.info("Phát hiện WorldGuard, sẽ tôn trọng các vùng được bảo vệ.")
         }
     }
 }

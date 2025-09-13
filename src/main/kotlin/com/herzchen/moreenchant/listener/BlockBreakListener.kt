@@ -16,15 +16,24 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
+import org.bukkit.event.player.PlayerQuitEvent
 
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 import kotlin.random.Random
 
 class BlockBreakListener(private val plugin: MoreEnchant) : Listener {
     private val enchantManager = plugin.enchantManager
     private val explosionManager = plugin.virtualExplosionManager
-    private val cooldowns = mutableMapOf<Pair<UUID, String>, Long>()
+    private val cooldowns = ConcurrentHashMap<Pair<UUID, String>, Long>()
+
+    @EventHandler
+    fun onPlayerQuit(event: PlayerQuitEvent) {
+        val playerId = event.player.uniqueId
+        cooldowns.keys.removeAll { it.first == playerId }
+        plugin.performanceOptimizer.clearCache(playerId)
+    }
 
     @EventHandler
     fun onBlockBreak(event: BlockBreakEvent) {
@@ -55,7 +64,6 @@ class BlockBreakListener(private val plugin: MoreEnchant) : Listener {
 
         if (shouldPreventExplosion) {
             player.sendActionBar(LegacyComponentSerializer.legacySection().deserialize("§cKho đã đầy! Tạm dừng nổ ảo."))
-
             event.isCancelled = true
             return
         }
@@ -64,7 +72,7 @@ class BlockBreakListener(private val plugin: MoreEnchant) : Listener {
             return
         }
 
-        if (plugin.virtualExplosionManager.shouldPauseExplosion(block.location)) {
+        if (plugin.virtualExplosionManager.shouldPauseExplosion(player)) {
             player.sendActionBar(LegacyComponentSerializer.legacySection().deserialize("§cTạm dừng nổ ảo: Quá nhiều vật phẩm xung quanh!"))
             return
         }

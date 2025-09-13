@@ -17,9 +17,22 @@ class TabCompleter(private val configManager: ConfigManager) : TabCompleter {
                 1 -> listOf("enchant", "disenchant", "reload", "help")
                     .filter { it.startsWith(args[0], true) }
                 2 -> when (args[0].lowercase()) {
-                    "enchant" -> configManager.explosionShapes.keys
+                    "enchant" -> listOf("virtualexplosion")
                         .filter { it.startsWith(args[1], true) }
-                        .toList()
+                    "disenchant" -> listOf("virtualexplosion")
+                        .filter { it.startsWith(args[1], true) }
+                    else -> emptyList()
+                }
+                3 -> when (args[0].lowercase()) {
+                    "enchant" -> {
+                        if (args[1].equals("virtualexplosion", ignoreCase = true)) {
+                            configManager.explosionShapes.keys
+                                .filter { it.startsWith(args[2], true) }
+                                .toList()
+                        } else {
+                            emptyList()
+                        }
+                    }
                     else -> emptyList()
                 }
                 else -> emptyList()

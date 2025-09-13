@@ -41,7 +41,7 @@ MoreEnchant hướng tới việc làm cho hệ thống enchant trên server tr�
     * Trong bài test của tôi ở `300% CPU` và `32GiB RAM` và `1 người chơi` thì cho kết quả `20x20x20` ~ `8000 block` thì sẽ gây 1 chút delay nhẹ. Rơi vào tầm khoảng `0.2 - 0.5s` delay.
     * `chance` và `cooldown` là hai tham số chính để cân bằng trải nghiệm game.
 
-**Ví dụ (đã có trong README):**
+**Ví dụ:**
 
 ```yaml
 explosion_shapes: 

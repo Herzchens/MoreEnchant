@@ -133,7 +133,7 @@ anti_lag:
 
 ```powershell
 gradlew.bat clean shadowJar
-# hoặc nếu dùng Git Bash: ./gradlew clean shadowJar
+./gradlew clean shadowJar # hoặc nếu dùng Git Bash
 ```
 
 File JAR sẽ được sinh ra ở `build/libs/` (hoặc đường dẫn tương tự tuỳ cấu hình Gradle).
@@ -194,6 +194,9 @@ Mình rất hoan nghênh Pull Request và Issue! Vui lòng:
 ## 📄 License
 
 Đọc file `LICENSE` để biết thêm thông tin chi tiết.
+
+## 📜 Các Thay Đổi
+Đọc file `CHANGELOG.md` để biết thêm thông tin
 
 ---
 

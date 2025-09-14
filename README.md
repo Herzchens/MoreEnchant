@@ -193,10 +193,10 @@ Mình rất hoan nghênh Pull Request và Issue! Vui lòng:
 
 ## 📄 License
 
-Đọc file `LICENSE` để biết thêm thông tin chi tiết.
+Đọc file [LICENSE](https://github.com/Herzchens/MoreEnchant/blob/main/LICENSE) để biết thêm thông tin chi tiết.
 
 ## 📜 Các Thay Đổi
-Đọc file `CHANGELOG.md` để biết thêm thông tin
+Đọc file [CHANGELOG.md](https://github.com/Herzchens/MoreEnchant/blob/main/CHANGELOG.md) để biết thêm thông tin
 
 ---
 

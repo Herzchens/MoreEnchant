@@ -63,7 +63,12 @@ class PlayerItemChangeListener(private val plugin: MoreEnchant) : Listener {
                 return
             }
 
-            val isPaused = plugin.virtualExplosion.shouldPauseExplosion(player)
+            val isPaused = if (plugin.virtualExplosion != null) {
+                plugin.virtualExplosion!!.shouldPauseExplosion(player)
+            } else {
+                false
+            }
+
             if (isPaused) {
                 plugin.bossBarManager.showBossBar(player,
                     "§cNổ ảo đã bị tạm dừng, vui lòng dọn dẹp vật phẩm xung quanh bạn!",

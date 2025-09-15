@@ -1,3 +1,4 @@
 # Cấu hình tổng
 enchantments:
   virtualexplosion: true
+  smelting: true

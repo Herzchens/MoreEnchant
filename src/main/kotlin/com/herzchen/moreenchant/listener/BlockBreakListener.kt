@@ -12,11 +12,13 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.block.Block
+import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.inventory.ItemStack
 
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -25,7 +27,6 @@ import kotlin.random.Random
 
 class BlockBreakListener(private val plugin: MoreEnchant) : Listener {
     private val enchantManager = plugin.enchantManager
-    private val explosionManager = plugin.virtualExplosion
     private val cooldowns = ConcurrentHashMap<Pair<UUID, String>, Long>()
 
     @EventHandler
@@ -52,27 +53,63 @@ class BlockBreakListener(private val plugin: MoreEnchant) : Listener {
             event.isCancelled = true
             return
         }
+
         if (!canPlayerBreakBlocks(player)) {
             player.sendActionBar(LegacyComponentSerializer.legacySection().deserialize("§cKho đã đầy! Không thể đập thêm khối."))
             event.isCancelled = true
             return
         }
 
-        val shouldPreventExplosion = plugin.extraStorageHook.isAvailable() &&
-                plugin.extraStorageHook.hasAutoPickup(player) &&
-                plugin.extraStorageHook.isStorageFull(player)
+        val hasSilkTouch = item.containsEnchantment(Enchantment.SILK_TOUCH)
+        val smeltingLevel = enchantManager.getSmeltingLevel(item)
 
-        if (shouldPreventExplosion) {
-            player.sendActionBar(LegacyComponentSerializer.legacySection().deserialize("§cKho đã đầy! Tạm dừng nổ ảo."))
-            event.isCancelled = true
-            return
+        if (!hasSilkTouch && smeltingLevel != null && plugin.smelting != null) {
+            if (plugin.smelting!!.shouldSmelt(item, smeltingLevel)) {
+                val fortuneLevel = if (block.type == Material.ANCIENT_DEBRIS || block.type == Material.NETHER_GOLD_ORE) {
+                    0
+                } else {
+                    item.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS)
+                }
+                val smeltingResult = plugin.smelting!!.getSmeltingResult(block.type, fortuneLevel)
+                if (smeltingResult != null) {
+                    event.isCancelled = true
+                    val (resultMaterial, amount) = smeltingResult
+                    val exp = plugin.smelting!!.calculateSmeltingExperience(block.type)
+                    if (hasAutoPickup) {
+                        val smeltedItem = ItemStack(resultMaterial, amount)
+                        val (successfulItems, failedItems) = plugin.extraStorageHook.addToStorage(player, listOf(smeltedItem))
+
+                        if (successfulItems.isNotEmpty()) {
+                            plugin.smelting!!.showSmeltingResultMessage(player, resultMaterial, amount, exp)
+                        }
+
+                        if (failedItems.isNotEmpty()) {
+                            failedItems.forEach { drop ->
+                                block.world.dropItemNaturally(block.location, drop)
+                            }
+                        }
+                    } else {
+                        block.world.dropItemNaturally(block.location, ItemStack(resultMaterial, amount))
+                        plugin.smelting!!.showSmeltingResultMessage(player, resultMaterial, amount, exp)
+                    }
+                    if (exp > 0) {
+                        player.giveExp(exp)
+                    }
+                    block.type = Material.AIR
+                    return
+                }
+            }
         }
 
         if (!plugin.configManager.blockWhitelist.contains(block.type)) {
             return
         }
 
-        if (plugin.virtualExplosion.shouldPauseExplosion(player)) {
+        if (plugin.virtualExplosion == null) {
+            return
+        }
+
+        if (plugin.virtualExplosion!!.shouldPauseExplosion(player)) {
             player.sendActionBar(LegacyComponentSerializer.legacySection().deserialize("§cTạm dừng nổ ảo: Quá nhiều vật phẩm xung quanh!"))
             return
         }
@@ -99,7 +136,7 @@ class BlockBreakListener(private val plugin: MoreEnchant) : Listener {
 
         event.isCancelled = true
 
-        if (plugin.extraStorageHook.isAvailable() && plugin.extraStorageHook.hasAutoPickup(player)) {
+        if (hasAutoPickup) {
             val originalDrops = block.getDrops(item).toList()
             if (originalDrops.isNotEmpty()) {
                 val (_, failedItems) = plugin.extraStorageHook.addToStorage(player, originalDrops)
@@ -124,7 +161,7 @@ class BlockBreakListener(private val plugin: MoreEnchant) : Listener {
 
         plugin.server.scheduler.runTask(plugin, Runnable {
             try {
-                explosionManager.handleVirtualExplosion(player, block.location, shapeKey)
+                plugin.virtualExplosion!!.handleVirtualExplosion(player, block.location, shapeKey)
             } catch (e: Exception) {
                 plugin.logger.warning("Lỗi khi xử lý vụ nổ ảo: ${e.message}")
                 e.printStackTrace()
@@ -159,7 +196,6 @@ class BlockBreakListener(private val plugin: MoreEnchant) : Listener {
             else -> 0
         }
     }
-
 
     private fun canPlayerBreakBlocks(player: Player): Boolean {
         if (!plugin.extraStorageHook.isAvailable()) return true

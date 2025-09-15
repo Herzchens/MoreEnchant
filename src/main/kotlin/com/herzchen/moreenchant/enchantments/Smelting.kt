@@ -1,6 +1,9 @@
 package com.herzchen.moreenchant.enchantments
 
 import com.herzchen.moreenchant.MoreEnchant
+import com.herzchen.moreenchant.utils.ExperienceUtils
+import com.herzchen.moreenchant.utils.MaterialUtils
+import com.herzchen.moreenchant.utils.FortuneUtils
 import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.enchantments.Enchantment
@@ -24,20 +27,6 @@ class Smelting(private val plugin: MoreEnchant) {
     private val baseAmounts = mapOf(
         Material.COPPER_ORE to { Random.nextInt(2, 6) },
         Material.DEEPSLATE_COPPER_ORE to { Random.nextInt(2, 6) }
-    )
-
-    private val materialColors = mapOf(
-        Material.IRON_INGOT to "§f",
-        Material.GOLD_INGOT to "§e",
-        Material.COPPER_INGOT to "§6",
-        Material.NETHERITE_SCRAP to "§4",
-    )
-
-    private val materialNames = mapOf(
-        Material.IRON_INGOT to "Thỏi Sắt",
-        Material.GOLD_INGOT to "Thỏi Vàng",
-        Material.COPPER_INGOT to "Thỏi Đồng",
-        Material.NETHERITE_SCRAP to "Mảnh Netherite",
     )
 
     private val levelConfig = mutableMapOf<String, SmeltingLevel>()
@@ -102,7 +91,7 @@ class Smelting(private val plugin: MoreEnchant) {
             }
 
             val finalAmount = if (fortuneLevel > 0 && original != Material.ANCIENT_DEBRIS && original != Material.NETHER_GOLD_ORE) {
-                applyFortune(baseAmount, fortuneLevel)
+                FortuneUtils.applyFortune(baseAmount, fortuneLevel)
             } else {
                 baseAmount
             }
@@ -113,7 +102,7 @@ class Smelting(private val plugin: MoreEnchant) {
         val customBlock = customBlocks[original]
         if (customBlock != null) {
             val amount = if (customBlock.fortuneApplies && fortuneLevel > 0) {
-                applyFortune(1, fortuneLevel)
+                FortuneUtils.applyFortune(1, fortuneLevel)
             } else {
                 1
             }
@@ -121,12 +110,6 @@ class Smelting(private val plugin: MoreEnchant) {
         }
 
         return null
-    }
-
-    private fun applyFortune(baseAmount: Int, fortuneLevel: Int): Int {
-        val r = Random.nextInt(0, fortuneLevel + 2)
-        val multiplier = if (r <= 1) 1 else r
-        return baseAmount * multiplier
     }
 
     fun getLevelConfig(level: String): SmeltingLevel? {
@@ -145,19 +128,12 @@ class Smelting(private val plugin: MoreEnchant) {
     }
 
     fun calculateSmeltingExperience(material: Material): Int {
-        return when (material) {
-            Material.IRON_ORE, Material.DEEPSLATE_IRON_ORE -> Random.nextInt(1, 3)
-            Material.GOLD_ORE, Material.DEEPSLATE_GOLD_ORE -> Random.nextInt(1, 3)
-            Material.COPPER_ORE, Material.DEEPSLATE_COPPER_ORE -> Random.nextInt(1, 3)
-            Material.NETHER_GOLD_ORE -> Random.nextInt(1, 3)
-            Material.ANCIENT_DEBRIS -> 2
-            else -> 0
-        }
+        return ExperienceUtils.calculateOreExperience(material)
     }
 
     fun showSmeltingResultMessage(player: Player, material: Material, amount: Int, exp: Int) {
-        val color = materialColors[material] ?: "§f"
-        val displayName = materialNames[material] ?: material.name
+        val color = MaterialUtils.materialColors[material] ?: "§f"
+        val displayName = MaterialUtils.materialNames[material] ?: material.name
 
         val message = "§f+ $amount $color$displayName" + if (exp > 0) " §7(+$exp EXP)" else ""
         player.sendActionBar(net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection().deserialize(message))

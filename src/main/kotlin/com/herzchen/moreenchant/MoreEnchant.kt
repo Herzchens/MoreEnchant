@@ -22,18 +22,7 @@ class MoreEnchant : JavaPlugin() {
     var virtualExplosion: VirtualExplosion? = null
     var smelting: Smelting? = null
 
-    private fun showEnableArt() {
-        this.server.consoleSender.sendMessage("")
-        this.server.consoleSender.sendMessage("§c         /@@      /@@           /@@@@@@@@          ")
-        this.server.consoleSender.sendMessage("§6        | @@@    /@@@          | @@_____/          ")
-        this.server.consoleSender.sendMessage("§e        | @@@@  /@@@@  /@@@@@@ | @@       /@@@@@@@ ")
-        this.server.consoleSender.sendMessage("§a        | @@ @@/@@ @@ /@@__  @@| @@@@@   | @@__  @@")
-        this.server.consoleSender.sendMessage("§b        | @@  @@@| @@| @@  \\ @@| @@__/   | @@  \\ @@")
-        this.server.consoleSender.sendMessage("§d        | @@\\  @ | @@| @@  | @@| @@      | @@  | @@")
-        this.server.consoleSender.sendMessage("§5        | @@ \\/  | @@|  @@@@@@/| @@@@@@@@| @@  | @@")
-        this.server.consoleSender.sendMessage("§9        |__/     |__/ \\______/ |________/|__/  |__/")
-    }
-    private fun showDisableArt() {
+    private fun art() {
         this.server.consoleSender.sendMessage("")
         this.server.consoleSender.sendMessage("§c         /@@      /@@           /@@@@@@@@          ")
         this.server.consoleSender.sendMessage("§6        | @@@    /@@@          | @@_____/          ")
@@ -70,7 +59,7 @@ class MoreEnchant : JavaPlugin() {
         getCommand("moe")?.setExecutor(MoeCommand(this))
         getCommand("moe")?.tabCompleter = TabCompleter(this)
 
-        showEnableArt()
+        art()
         this.server.consoleSender.sendMessage("§a================================================================================")
         this.server.consoleSender.sendMessage("§e>> MoreEnchant v1.2.01 Đã bật!")
         this.server.consoleSender.sendMessage("§e>> Chạy trên phiên bản Minecraft ${server.version}")
@@ -86,30 +75,12 @@ class MoreEnchant : JavaPlugin() {
         } else {
             this.server.consoleSender.sendMessage("§c>> Smelting: Đã tắt")
         }
-
-        server.scheduler.runTask(this, Runnable {
-            for (player in server.onlinePlayers) {
-                val item = player.inventory.itemInMainHand
-                if (this@MoreEnchant.enchantManager.getEnchantShape(item) != null) {
-                    val isPaused = virtualExplosion?.shouldPauseExplosion(player) ?: false
-                    if (isPaused) {
-                        bossBarManager.showBossBar(player,
-                            "§eNổ ảo đã bị tạm dừng, vui lòng dọn dẹp item xung quanh bạn!",
-                            org.bukkit.boss.BarColor.YELLOW)
-                    } else {
-                        bossBarManager.showBossBar(player,
-                            "§aHiện đang kích hoạt Nổ Ảo",
-                            org.bukkit.boss.BarColor.GREEN)
-                    }
-                }
-            }
-        })
     }
 
     override fun onDisable() {
         bossBarManager.removeAllBossBars()
         HandlerList.unregisterAll(this)
-        showDisableArt()
+        art()
         this.server.consoleSender.sendMessage("§c================================================================================")
         this.server.consoleSender.sendMessage("§c>> MoreEnchant Đã Tắt!")
         logger.info("MoreEnchant đã tắt!")

@@ -1,6 +1,7 @@
 package com.herzchen.moreenchant.listener
 
 import com.herzchen.moreenchant.MoreEnchant
+import com.herzchen.moreenchant.utils.ExperienceUtils
 
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 
@@ -161,15 +162,7 @@ class BlockBreakListener(private val plugin: MoreEnchant) : Listener {
     }
 
     private fun calculateBlockExperience(block: Block): Int {
-        return when (block.type) {
-            Material.COAL_ORE -> Random.Default.nextInt(0, 2)
-            Material.DIAMOND_ORE -> Random.Default.nextInt(3, 7)
-            Material.EMERALD_ORE -> Random.Default.nextInt(3, 7)
-            Material.LAPIS_ORE -> Random.Default.nextInt(2, 5)
-            Material.NETHER_QUARTZ_ORE -> Random.Default.nextInt(2, 5)
-            Material.REDSTONE_ORE -> Random.Default.nextInt(1, 5)
-            else -> 0
-        }
+        return ExperienceUtils.calculateBlockExperience(block.type)
     }
 
     private fun canPlayerBreakBlocks(player: Player): Boolean {

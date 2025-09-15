@@ -2,6 +2,9 @@ package com.herzchen.moreenchant.enchantments
 
 import com.herzchen.moreenchant.MoreEnchant
 import com.herzchen.moreenchant.manager.ConfigManager
+import com.herzchen.moreenchant.utils.ExperienceUtils
+import com.herzchen.moreenchant.utils.FortuneUtils
+import com.herzchen.moreenchant.utils.MaterialUtils
 
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 
@@ -32,74 +35,6 @@ class VirtualExplosion(private val plugin: MoreEnchant) {
         Material.RAW_GOLD,
         Material.RAW_COPPER
     )
-
-    private val experienceValues = mapOf(
-        Material.COAL to { Random.Default.nextInt(0, 3) },
-        Material.DIAMOND to { Random.Default.nextInt(3, 8) },
-        Material.EMERALD to { Random.Default.nextInt(3, 8) },
-        Material.LAPIS_LAZULI to { Random.Default.nextInt(2, 6) },
-        Material.REDSTONE to { Random.Default.nextInt(1, 6) },
-        Material.QUARTZ to { Random.Default.nextInt(2, 6) }
-    )
-
-    private val materialColors = mapOf(
-        Material.STONE to "§7",
-        Material.COBBLESTONE to "§7",
-        Material.COAL to "§0",
-        Material.IRON_ORE to "§f",
-        Material.GOLD_ORE to "§e",
-        Material.DIAMOND to "§b",
-        Material.EMERALD to "§a",
-        Material.REDSTONE to "§c",
-        Material.LAPIS_LAZULI to "§9",
-        Material.QUARTZ to "§f",
-        Material.RAW_IRON to "§f",
-        Material.RAW_GOLD to "§e",
-        Material.RAW_COPPER to "§6",
-        Material.IRON_INGOT to "§f",
-        Material.GOLD_INGOT to "§e",
-        Material.COPPER_INGOT to "§6",
-        Material.DEEPSLATE_COAL_ORE to "§8",
-        Material.DEEPSLATE_IRON_ORE to "§f",
-        Material.DEEPSLATE_GOLD_ORE to "§e",
-        Material.DEEPSLATE_DIAMOND_ORE to "§b",
-        Material.DEEPSLATE_EMERALD_ORE to "§a",
-        Material.DEEPSLATE_REDSTONE_ORE to "§c",
-        Material.DEEPSLATE_LAPIS_ORE to "§9"
-    )
-
-    private fun getMaterialDisplayName(material: Material): String {
-        return when (material) {
-            Material.STONE -> "Đá"
-            Material.COBBLESTONE -> "Đá Cuội"
-            Material.COAL -> "Than"
-            Material.IRON_ORE -> "Quặng Sắt"
-            Material.GOLD_ORE -> "Quặng Vàng"
-            Material.DIAMOND -> "Kim Cương"
-            Material.EMERALD -> "Ngọc Lục Bảo"
-            Material.REDSTONE -> "Đá Đỏ"
-            Material.LAPIS_LAZULI -> "Lưu Ly"
-            Material.QUARTZ -> "Thạch Anh"
-            Material.RAW_IRON -> "Sắt Thô"
-            Material.RAW_GOLD -> "Vàng Thô"
-            Material.RAW_COPPER -> "Đồng Thô"
-            Material.IRON_INGOT -> "Thỏi Sắt"
-            Material.GOLD_INGOT -> "Thỏi Vàng"
-            Material.COPPER_INGOT -> "Thỏi Đồng"
-            Material.DEEPSLATE_COAL_ORE -> "Quặng Than Đá Bảng Sâu"
-            Material.DEEPSLATE_IRON_ORE -> "Quặng Sắt Đá Bảng Sâu"
-            Material.DEEPSLATE_GOLD_ORE -> "Quặng Vàng Đá Bảng Sâu"
-            Material.DEEPSLATE_DIAMOND_ORE -> "Quặng Kim Cương Đá Bảng Sâu"
-            Material.DEEPSLATE_EMERALD_ORE -> "Quặng Ngọc Lục Bảo Đá Bảng Sâu"
-            Material.DEEPSLATE_REDSTONE_ORE -> "Quặng Đá Đỏ Đá Bảng Sâu"
-            Material.DEEPSLATE_LAPIS_ORE -> "Quặng Lưu Ly Đá Bảng Sâu"
-            else -> material.name
-        }
-    }
-
-    fun calculateExperience(material: Material): Int {
-        return experienceValues[material]?.invoke() ?: 0
-    }
 
     fun handleVirtualExplosion(
         player: Player,
@@ -231,26 +166,25 @@ class VirtualExplosion(private val plugin: MoreEnchant) {
         return when (material) {
             Material.LAPIS_LAZULI -> {
                 val baseAmount = Random.Default.nextInt(4, 10)
-                applyFortuneMultiplier(baseAmount, fortuneLevel)
+                FortuneUtils.applyFortune(baseAmount, fortuneLevel)
             }
             Material.REDSTONE -> {
                 val baseAmount = Random.Default.nextInt(4, 6)
-                applyFortuneMultiplier(baseAmount, fortuneLevel)
+                FortuneUtils.applyFortune(baseAmount, fortuneLevel)
             }
             Material.RAW_COPPER -> {
                 val baseAmount = Random.Default.nextInt(2, 6)
-                applyFortuneMultiplier(baseAmount, fortuneLevel)
+                FortuneUtils.applyFortune(baseAmount, fortuneLevel)
             }
             else -> {
-                applyFortuneMultiplier(1, fortuneLevel)
+                FortuneUtils.applyFortune(1, fortuneLevel)
             }
         }
     }
 
-    private fun applyFortuneMultiplier(baseAmount: Int, fortuneLevel: Int): Int {
-        val r = Random.Default.nextInt(0, fortuneLevel + 2)
-        val multiplier = if (r <= 1) 1 else r
-        return baseAmount * multiplier
+    private fun calculateExperience(material: Material): Int {
+        // Sử dụng ExperienceUtils để tính toán kinh nghiệm
+        return ExperienceUtils.calculateBlockExperience(material) + ExperienceUtils.calculateOreExperience(material)
     }
 
     private fun dropItems(items: List<ItemStack>, location: Location) {
@@ -289,8 +223,8 @@ class VirtualExplosion(private val plugin: MoreEnchant) {
                 message.append("§7, ")
             }
 
-            val color = materialColors[material] ?: "§f"
-            val displayName = getMaterialDisplayName(material)
+            val color = MaterialUtils.getMaterialColor(material)
+            val displayName = MaterialUtils.getMaterialDisplayName(material)
 
             message.append("§f+ §3$count $color$displayName")
             first = false

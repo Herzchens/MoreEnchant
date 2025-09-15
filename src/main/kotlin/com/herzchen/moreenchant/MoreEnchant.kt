@@ -2,7 +2,7 @@ package com.herzchen.moreenchant
 
 import com.herzchen.moreenchant.commands.MoeCommand
 import com.herzchen.moreenchant.utils.TabCompleter
-import com.herzchen.moreenchant.enchantments.virtualexplosion.manager.VirtualExplosionManager
+import com.herzchen.moreenchant.enchantments.VirtualExplosion
 import com.herzchen.moreenchant.integration.ExtraStorageHook
 import com.herzchen.moreenchant.listener.BlockBreakListener
 import com.herzchen.moreenchant.manager.*
@@ -16,7 +16,7 @@ class MoreEnchant : JavaPlugin() {
     lateinit var enchantManager: EnchantManager
     lateinit var permissionManager: PermissionManager
     lateinit var extraStorageHook: ExtraStorageHook
-    lateinit var virtualExplosionManager: VirtualExplosionManager
+    lateinit var virtualExplosion: VirtualExplosion
     lateinit var bossBarManager: BossBarManager
     lateinit var performanceOptimizer: PerformanceOptimizer
 
@@ -50,7 +50,7 @@ class MoreEnchant : JavaPlugin() {
         enchantManager = EnchantManager()
         bossBarManager = BossBarManager()
         extraStorageHook = ExtraStorageHook(this)
-        virtualExplosionManager = VirtualExplosionManager(this)
+        virtualExplosion = VirtualExplosion(this)
         performanceOptimizer = PerformanceOptimizer(this)
         server.pluginManager.registerEvents(PlayerItemChangeListener(this), this)
 
@@ -71,7 +71,7 @@ class MoreEnchant : JavaPlugin() {
             for (player in server.onlinePlayers) {
                 val item = player.inventory.itemInMainHand
                 if (this@MoreEnchant.enchantManager.getEnchantShape(item) != null) {
-                    val isPaused = virtualExplosionManager.shouldPauseExplosion(player)
+                    val isPaused = virtualExplosion.shouldPauseExplosion(player)
                     if (isPaused) {
                         bossBarManager.showBossBar(player,
                             "§eNổ ảo đã bị tạm dừng, vui lòng dọn dẹp item xung quanh bạn!",

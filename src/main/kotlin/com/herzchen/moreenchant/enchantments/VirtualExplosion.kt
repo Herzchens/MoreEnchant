@@ -1,4 +1,4 @@
-package com.herzchen.moreenchant.enchantments.virtualexplosion.manager
+package com.herzchen.moreenchant.enchantments
 
 import com.herzchen.moreenchant.MoreEnchant
 import com.herzchen.moreenchant.manager.ConfigManager
@@ -7,14 +7,16 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.boss.BarColor
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import kotlin.collections.iterator
 
 import kotlin.math.min
 import kotlin.random.Random
 
-class VirtualExplosionManager(private val plugin: MoreEnchant) {
+class VirtualExplosion(private val plugin: MoreEnchant) {
     private val config = plugin.configManager
     private val permissionManager = plugin.permissionManager
     private val extraStorageHook = plugin.extraStorageHook
@@ -131,7 +133,7 @@ class VirtualExplosionManager(private val plugin: MoreEnchant) {
         if (shouldPause) {
             plugin.bossBarManager.showBossBar(player,
                 "§cNổ ảo đã bị tạm dừng, vui lòng dọn dẹp vật phẩm xung quanh bạn!",
-                org.bukkit.boss.BarColor.RED)
+                BarColor.RED)
             return
         }
 
@@ -161,7 +163,7 @@ class VirtualExplosionManager(private val plugin: MoreEnchant) {
 
                 plugin.bossBarManager.showBossBar(player,
                     "§cNổ Ảo§7: §f${shapeKey} §7(§f+${totalExperience} §aEXP§7)",
-                    org.bukkit.boss.BarColor.YELLOW)
+                    BarColor.YELLOW)
 
                 plugin.server.scheduler.runTaskLater(plugin, Runnable {
                     val item = player.inventory.itemInMainHand
@@ -172,11 +174,11 @@ class VirtualExplosionManager(private val plugin: MoreEnchant) {
                         if (isPaused) {
                             plugin.bossBarManager.showBossBar(player,
                                 "§cNổ ảo đã bị tạm dừng, vui lòng dọn dẹp vật phẩm xung quanh bạn!",
-                                org.bukkit.boss.BarColor.RED)
+                                BarColor.RED)
                         } else {
                             plugin.bossBarManager.showBossBar(player,
                                 "§aHiện đang kích hoạt Nổ Ảo",
-                                org.bukkit.boss.BarColor.GREEN)
+                                BarColor.GREEN)
                         }
                     } else {
                         plugin.bossBarManager.hideBossBar(player)

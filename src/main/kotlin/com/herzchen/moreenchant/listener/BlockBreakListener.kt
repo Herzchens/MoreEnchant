@@ -25,7 +25,7 @@ import kotlin.random.Random
 
 class BlockBreakListener(private val plugin: MoreEnchant) : Listener {
     private val enchantManager = plugin.enchantManager
-    private val explosionManager = plugin.virtualExplosionManager
+    private val explosionManager = plugin.virtualExplosion
     private val cooldowns = ConcurrentHashMap<Pair<UUID, String>, Long>()
 
     @EventHandler
@@ -72,7 +72,7 @@ class BlockBreakListener(private val plugin: MoreEnchant) : Listener {
             return
         }
 
-        if (plugin.virtualExplosionManager.shouldPauseExplosion(player)) {
+        if (plugin.virtualExplosion.shouldPauseExplosion(player)) {
             player.sendActionBar(LegacyComponentSerializer.legacySection().deserialize("§cTạm dừng nổ ảo: Quá nhiều vật phẩm xung quanh!"))
             return
         }

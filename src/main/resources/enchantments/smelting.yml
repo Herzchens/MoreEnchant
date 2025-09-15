@@ -1,0 +1,29 @@
+# Cấu hình Smelting Enchantment
+levels:
+  I:
+    chance: 30.0
+    cooldown: 0.2
+  II:
+    chance: 60.0
+    cooldown: 0.1
+  III:
+    chance: 100.0
+    cooldown: 0.0
+
+# Quặng vanilla được phép nung chảy
+vanilla_blocks:
+  IRON_ORE: true
+  DEEPSLATE_IRON_ORE: true
+  GOLD_ORE: true
+  DEEPSLATE_GOLD_ORE: true
+  COPPER_ORE: true
+  DEEPSLATE_COPPER_ORE: true
+  NETHER_GOLD_ORE: true
+  ANCIENT_DEBRIS: true
+
+# Quặng custom
+custom_blocks:
+  MYTHIC_ORES_SILVER_ORE:
+    raw_item: "MYTHIC_ORES_RAW_SILVER"
+    smelted_item: "MYTHIC_ORES_SILVER_INGOT"
+    fortune_applies: true

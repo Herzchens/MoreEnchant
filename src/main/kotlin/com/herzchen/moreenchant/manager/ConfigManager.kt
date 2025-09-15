@@ -3,7 +3,6 @@ package com.herzchen.moreenchant.manager
 import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.plugin.java.JavaPlugin
-
 import java.io.File
 
 class ConfigManager(private val plugin: JavaPlugin) {
@@ -38,7 +37,9 @@ class ConfigManager(private val plugin: JavaPlugin) {
         private set
     var checkRadius = 10
         private set
-    var virtualExplosionEnabled = false
+    var virtualExplosionEnabled = true
+        private set
+    var smeltingEnabled = true
         private set
 
     private val _blockWhitelist = mutableSetOf<Material>()
@@ -55,16 +56,22 @@ class ConfigManager(private val plugin: JavaPlugin) {
         }
 
         val config = YamlConfiguration.loadConfiguration(configFile)
-        virtualExplosionEnabled = config.getBoolean("enchantments.virtualexplosion", false)
+        virtualExplosionEnabled = config.getBoolean("enchantments.virtualexplosion", true)
+        smeltingEnabled = config.getBoolean("enchantments.smelting", true)
 
         if (virtualExplosionEnabled) {
             loadVirtualExplosionConfig()
         }
+
+        if (smeltingEnabled) {
+            loadSmeltingConfig()
+        }
     }
 
     private fun loadVirtualExplosionConfig() {
+        File(plugin.dataFolder, "enchantments").mkdirs()
+
         val veConfigFile = File(plugin.dataFolder, "enchantments/virtualexplosion.yml").apply {
-            parentFile.mkdirs()
             if (!exists()) plugin.saveResource("enchantments/virtualexplosion.yml", false)
         }
 
@@ -73,6 +80,18 @@ class ConfigManager(private val plugin: JavaPlugin) {
         loadDropGroups(veConfig)
         loadVESettings(veConfig)
         loadBlockWhitelist(veConfig)
+
+        plugin.logger.info("Cấu hình VirtualExplosion đã được nạp")
+    }
+
+    private fun loadSmeltingConfig() {
+        File(plugin.dataFolder, "enchantments").mkdirs()
+
+        File(plugin.dataFolder, "enchantments/smelting.yml").apply {
+            if (!exists()) plugin.saveResource("enchantments/smelting.yml", false)
+        }
+
+        plugin.logger.info("Cấu hình Smelting đã được nạp")
     }
 
     private fun loadExplosionShapes(config: YamlConfiguration) {
@@ -149,5 +168,4 @@ class ConfigManager(private val plugin: JavaPlugin) {
     }
 
     fun getExplosionShape(shapeKey: String) = _explosionShapes[shapeKey]
-
 }

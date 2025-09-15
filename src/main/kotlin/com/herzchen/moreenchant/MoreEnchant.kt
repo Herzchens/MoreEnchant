@@ -33,17 +33,16 @@ class MoreEnchant : JavaPlugin() {
         this.server.consoleSender.sendMessage("§5        | @@ \\/  | @@|  @@@@@@/| @@@@@@@@| @@  | @@")
         this.server.consoleSender.sendMessage("§9        |__/     |__/ \\______/ |________/|__/  |__/")
     }
-
     private fun showDisableArt() {
         this.server.consoleSender.sendMessage("")
-        this.server.consoleSender.sendMessage("§8         /@@      /@@           /@@@@@@@@          ")
-        this.server.consoleSender.sendMessage("§7        | @@@    /@@@          | @@_____/          ")
-        this.server.consoleSender.sendMessage("§c        | @@@@  /@@@@  /@@@@@@ | @@       /@@@@@@@ ")
-        this.server.consoleSender.sendMessage("§4        | @@ @@/@@ @@ /@@__  @@| @@@@@   | @@__  @@")
-        this.server.consoleSender.sendMessage("§c        | @@  @@@| @@| @@  \\ @@| @@__/   | @@  \\ @@")
-        this.server.consoleSender.sendMessage("§7        | @@\\  @ | @@| @@  | @@| @@      | @@  | @@")
-        this.server.consoleSender.sendMessage("§8        | @@ \\/  | @@|  @@@@@@/| @@@@@@@@| @@  | @@")
-        this.server.consoleSender.sendMessage("§0        |__/     |__/ \\______/ |________/|__/  |__/")
+        this.server.consoleSender.sendMessage("§c         /@@      /@@           /@@@@@@@@          ")
+        this.server.consoleSender.sendMessage("§6        | @@@    /@@@          | @@_____/          ")
+        this.server.consoleSender.sendMessage("§e        | @@@@  /@@@@  /@@@@@@ | @@       /@@@@@@@ ")
+        this.server.consoleSender.sendMessage("§a        | @@ @@/@@ @@ /@@__  @@| @@@@@   | @@__  @@")
+        this.server.consoleSender.sendMessage("§b        | @@  @@@| @@| @@  \\ @@| @@__/   | @@  \\ @@")
+        this.server.consoleSender.sendMessage("§d        | @@\\  @ | @@| @@  | @@| @@      | @@  | @@")
+        this.server.consoleSender.sendMessage("§5        | @@ \\/  | @@|  @@@@@@/| @@@@@@@@| @@  | @@")
+        this.server.consoleSender.sendMessage("§9        |__/     |__/ \\______/ |________/|__/  |__/")
     }
 
     override fun onEnable() {

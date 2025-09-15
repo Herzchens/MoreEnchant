@@ -15,7 +15,6 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
-    compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.9")
     implementation(kotlin("stdlib-jdk8"))
 }
 
@@ -42,6 +41,5 @@ tasks {
     shadowJar {
         archiveClassifier.set("")
         manifest.attributes["Main-Class"] = "com.herzchen.moreenchant.MoreEnchant"
-        exclude("com/sk89q/worldguard/**")
     }
 }

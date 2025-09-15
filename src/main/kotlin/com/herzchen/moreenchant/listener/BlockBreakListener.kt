@@ -2,11 +2,6 @@ package com.herzchen.moreenchant.listener
 
 import com.herzchen.moreenchant.MoreEnchant
 
-import com.sk89q.worldedit.bukkit.BukkitAdapter
-import com.sk89q.worldguard.WorldGuard
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin
-import com.sk89q.worldguard.protection.flags.Flags
-
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 
 import org.bukkit.GameMode
@@ -130,10 +125,6 @@ class BlockBreakListener(private val plugin: MoreEnchant) : Listener {
             return
         }
 
-        if (!checkWorldGuard(player, block)) {
-            return
-        }
-
         event.isCancelled = true
 
         if (hasAutoPickup) {
@@ -167,22 +158,6 @@ class BlockBreakListener(private val plugin: MoreEnchant) : Listener {
                 e.printStackTrace()
             }
         })
-    }
-
-    private fun checkWorldGuard(player: Player, block: Block): Boolean {
-        val wgPlugin = plugin.server.pluginManager.getPlugin("WorldGuard") ?: return true
-        if (!wgPlugin.isEnabled) return true
-
-        return try {
-            val container = WorldGuard.getInstance().platform.regionContainer
-            val query = container.createQuery()
-            val wgLocation = BukkitAdapter.adapt(block.location)
-            val localPlayer = WorldGuardPlugin.inst().wrapPlayer(player)
-            query.testState(wgLocation, localPlayer, Flags.BUILD)
-        } catch (ex: Exception) {
-            plugin.logger.warning("Lỗi kiểm tra WorldGuard: ${ex.message}")
-            true
-        }
     }
 
     private fun calculateBlockExperience(block: Block): Int {

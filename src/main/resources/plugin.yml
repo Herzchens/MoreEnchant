@@ -3,7 +3,7 @@ version: 1.2
 main: com.herzchen.moreenchant.MoreEnchant
 api-version: 1.20
 description: New enchantments for minecraft
-softdepend: [WorldGuard]
+softdepend: [ExtraStorage]
 author: Herzchen
 
 commands:

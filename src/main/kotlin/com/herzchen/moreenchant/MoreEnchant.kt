@@ -87,9 +87,6 @@ class MoreEnchant : JavaPlugin() {
             this.server.consoleSender.sendMessage("§c>> Smelting: Đã tắt")
         }
 
-        checkWorldGuard()
-
-        logger.info("MoreEnchant đã bật!")
         server.scheduler.runTask(this, Runnable {
             for (player in server.onlinePlayers) {
                 val item = player.inventory.itemInMainHand
@@ -116,19 +113,5 @@ class MoreEnchant : JavaPlugin() {
         this.server.consoleSender.sendMessage("§c================================================================================")
         this.server.consoleSender.sendMessage("§c>> MoreEnchant Đã Tắt!")
         logger.info("MoreEnchant đã tắt!")
-    }
-
-    private fun checkWorldGuard() {
-        if (server.pluginManager.getPlugin("WorldGuard") == null) {
-            logger.warning("================================================")
-            logger.warning("WorldGuard không được tìm thấy!")
-            logger.warning("Các khu vực được bảo vệ sẽ KHÔNG được áp dụng")
-            logger.warning("cho hiệu ứng nổ ảo.")
-            logger.warning("")
-            logger.warning("Hãy cài đặt WorldGuard để sử dụng tính năng bảo vệ")
-            logger.warning("================================================")
-        } else {
-            logger.info("Phát hiện WorldGuard, sẽ tôn trọng các vùng được bảo vệ.")
-        }
     }
 }

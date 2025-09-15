@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.herzchen"
-version = "1.2.01"
+version = "1.2.02"
 
 repositories {
     mavenCentral()

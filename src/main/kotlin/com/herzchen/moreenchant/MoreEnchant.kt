@@ -61,7 +61,7 @@ class MoreEnchant : JavaPlugin() {
 
         art()
         this.server.consoleSender.sendMessage("§a================================================================================")
-        this.server.consoleSender.sendMessage("§e>> MoreEnchant v1.2.01 Đã bật!")
+        this.server.consoleSender.sendMessage("§e>> MoreEnchant v1.2.02 Đã bật!")
         this.server.consoleSender.sendMessage("§e>> Chạy trên phiên bản Minecraft ${server.version}")
 
         if (configManager.virtualExplosionEnabled) {

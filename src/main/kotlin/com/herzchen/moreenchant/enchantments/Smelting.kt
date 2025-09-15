@@ -124,21 +124,9 @@ class Smelting(private val plugin: MoreEnchant) {
     }
 
     private fun applyFortune(baseAmount: Int, fortuneLevel: Int): Int {
-        return when (fortuneLevel) {
-            1 -> baseAmount * (if (Random.nextDouble() < 0.33) 2 else 1)
-            2 -> baseAmount * when ((Random.nextDouble() * 100).toInt()) {
-                in 0..24 -> 1
-                in 25..49 -> 2
-                else -> 3
-            }
-            3 -> baseAmount * when ((Random.nextDouble() * 100).toInt()) {
-                in 0..19 -> 1
-                in 20..39 -> 2
-                in 40..59 -> 3
-                else -> 4
-            }
-            else -> baseAmount
-        }
+        val r = Random.nextInt(0, fortuneLevel + 2)
+        val multiplier = if (r <= 1) 1 else r
+        return baseAmount * multiplier
     }
 
     fun getLevelConfig(level: String): SmeltingLevel? {

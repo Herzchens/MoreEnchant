@@ -4,7 +4,7 @@ Tất cả thay đổi quan trọng của dự án **MoreEnchant** sẽ được
 ---
 
 # <span style="color: #1e90ff;">[Unreleased]</span>
-- ### Khởi tạo cấu trúc đơn giản của hệ thống Virtual Explosion.
+- ### Khởi tạo cấu trúc đơn giản của hệ thống `Virtual Explosion`.
 - ### Refactor/chia lại lớp, class.
 - ### Logic random khối cho việc nổ ảo.
 - ### Logic event listener.
@@ -19,12 +19,12 @@ Tất cả thay đổi quan trọng của dự án **MoreEnchant** sẽ được
 - ### Logic kiểm tra vật phẩm xung quanh.
 - ### Hiển thị Bossbar khi cầm item có enchant đặc biệt.
 - ### Hook hỗ trợ `ExtraStorageCustom`.
-- ### Thêm TabCompleter.
-- ### Thêm Helper.
-- ### Thêm các lớp Listener.
+- ### Thêm `TabCompleter.kt`
+- ### Thêm `Helper.kt`
+- ### Thêm các lớp `BlockBreakListener.kt`
 
 ## <span style="color: #ffa500;">Thay đổi</span>
-- ### Đổi tên dự án thành More Enchant
+- ### Đổi tên dự án thành `More Enchant`
 - ### Đổi lệnh từ `ve` -> `moe`
 - ### Đổi lại màu của enchant, loại bỏ lore shape.
 - ### Refactor cấu trúc lần 2.
@@ -41,7 +41,7 @@ Tất cả thay đổi quan trọng của dự án **MoreEnchant** sẽ được
 ## <span style="color: #32cd32;">Thêm</span>
 - ### Phiên bản này chỉ là một phiên bản tối ưu hoá logic.
 - ### Thêm các giới hạn cứng liên quan đến việc chặn đào block khi kho đầy.
-- ### Thêm lớp PerformanceOptimizer
+- ### Thêm lớp `PerformanceOptimizer.kt`
 
 ## <span style="color: #ffa500;">Thay đổi</span>
 - ### <span style="color: #32cd32;">Sửa đổi logic random block từ O(n * m) -> O(n log m):</span>
@@ -52,7 +52,7 @@ Tất cả thay đổi quan trọng của dự án **MoreEnchant** sẽ được
 - ### <span style="color: #32cd32;">Sửa đổi logic tính toán block và experience:</span>
   - Chuyển từ main thread sang async task giúp tăng hiệu suất.
 - ### <span style="color: #32cd32;">Thêm debounce cho bossbar.</span>
-- ### <span style="color: #32cd32;">Sửa lỗi Reflection Overhead trong ExtraStorageHook:</span>
+- ### <span style="color: #32cd32;">Sửa lỗi Reflection Overhead trong `ExtraStorageHook`:</span>
   -  Cache các method object sau lần đầu lookup để giảm độ trễ.
 - ### Refactor lại cấu trúc lần 3
 
@@ -89,3 +89,30 @@ Tất cả thay đổi quan trọng của dự án **MoreEnchant** sẽ được
 - **<span style="color: #32cd32;">CPU usage giảm</span>** 40-50%
 - **<span style="color: #32cd32;">Memory usage ổn định</span>** hơn, ít GC pauses
 
+---
+
+# <span style="color: #1e90ff;">[1.2] - 2025-09-15</span>
+## <span style="color: #32cd32;">Thêm</span>
+- ### Enchantment Smelting mới.
+- ### Logic random kinh nghiệm mô phỏng việc nung quặng.
+- ### Logic cho phép nung quặng custom.
+- ### Logic xử lý gia tài cho vật phẩm.
+- ### Hook hỗ trợ `ExtraStorageCustom`.
+- ### Thêm thành phần cho `TabCompleter.kt`.
+- ### Thêm `Helper.kt`.
+- ### Thêm Listener bên trong `BlockBreakListener.kt`.
+- ### Thêm file `enchantments/smelting.yml`.
+- ### Thêm method add lore cho vật phẩm.
+
+## <span style="color: #ffa500;">Thay đổi</span>
+- ### Thêm method tạo file nếu như chưa có
+- ### Chuyển `.trimIndent` -> `this.server.consoleSender.sendMessage`trong lớp `MoreEnchant.kt`
+- ### Sửa giá trị default của các enchant trong `config.yml`
+- ### Refactor cấu trúc lần 4.
+
+## <span style="color: #ff4500;">Sửa lỗi</span>
+- ### <span style="color: #ff4500;">Fix lỗi thừa raw copper/iron/gold trong enchant nổ ảo</span>
+- ### <span style="color: #ff4500;">Fix lỗi tính gia tài quá lố cho quặng vàng địa ngục.</span>
+- ### <span style="color: #ff4500;">Fix lỗi tính gia tài cho mảnh vỡ cổ đại.</span>
+
+---

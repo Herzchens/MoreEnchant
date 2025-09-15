@@ -39,10 +39,7 @@ class VirtualExplosion(private val plugin: MoreEnchant) {
         Material.EMERALD to { Random.Default.nextInt(3, 8) },
         Material.LAPIS_LAZULI to { Random.Default.nextInt(2, 6) },
         Material.REDSTONE to { Random.Default.nextInt(1, 6) },
-        Material.QUARTZ to { Random.Default.nextInt(2, 6) },
-        Material.RAW_IRON to { Random.Default.nextInt(1, 3) },
-        Material.RAW_GOLD to { Random.Default.nextInt(1, 3) },
-        Material.RAW_COPPER to { Random.Default.nextInt(1, 3) }
+        Material.QUARTZ to { Random.Default.nextInt(2, 6) }
     )
 
     private val materialColors = mapOf(

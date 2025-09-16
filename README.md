@@ -30,21 +30,21 @@ MoreEnchant hướng tới việc làm cho hệ thống enchant trên server tr�
 * **File cấu hình:** `plugins/MoreEnchant/enchantments/virtualexplosion.yml`
 * **Tham số chính trong ví dụ:**
 
-    * `width` — chiều ngang vùng ảnh hưởng (số block).
-    * `height` — chiều cao vùng ảnh hưởng (số block).
-    * `depth` — độ sâu vùng ảnh hưởng (số block).
-    * `chance` — xác suất % để trigger nổ ảo.
-    * `cooldown` — thời gian hồi giữa các lần trigger tính theo giây
+  * `width` — chiều ngang vùng ảnh hưởng (số block).
+  * `height` — chiều cao vùng ảnh hưởng (số block).
+  * `depth` — độ sâu vùng ảnh hưởng (số block).
+  * `chance` — xác suất % để trigger nổ ảo.
+  * `cooldown` — thời gian hồi giữa các lần trigger tính theo giây
 * **Ghi chú:**
 
-    * Giữ `width/height/depth` ở mức hợp lý (ví dụ <= 7) để tránh ảnh hưởng hiệu năng.
-    * Trong bài test của tôi ở `300% CPU` và `32GiB RAM` và `1 người chơi` thì cho kết quả `20x20x20` ~ `8000 block` thì sẽ gây 1 chút delay nhẹ. Rơi vào tầm khoảng `0.2 - 0.5s` delay.
-    * `chance` và `cooldown` là hai tham số chính để cân bằng trải nghiệm game.
+  * Giữ `width/height/depth` ở mức hợp lý (ví dụ <= 7) để tránh ảnh hưởng hiệu năng.
+  * Trong bài test của tôi ở `300% CPU` và `32GiB RAM` và `1 người chơi` thì cho kết quả `20x20x20` ~ `8000 block` thì sẽ gây 1 chút delay nhẹ. Rơi vào tầm khoảng `0.2 - 0.5s` delay.
+  * `chance` và `cooldown` là hai tham số chính để cân bằng trải nghiệm game.
 
 **Ví dụ:**
 
 ```yaml
-explosion_shapes: 
+explosion_shapes:
   I:
     width: 3
     height: 3
@@ -61,7 +61,7 @@ virtual_drops: # DropTable cho nổ ảo.
   default: # Khi người chơi không có quyền nào của oregen
     drops:
       STONE: 100.0 # 100% sẽ rơi ra đá
-      LAPIS_LAZULI: 100.0 
+      LAPIS_LAZULI: 100.0
       REDSTONE: 100.0
       GOLD_INGOT: 30.0 # 30% rơi ra thỏi vàng
       IRON_INGOT: 36.3 # 36,3% tỷ lệ rơi ra thỏi sắt
@@ -91,9 +91,51 @@ anti_lag:
 
 ---
 
-### 2) Trống
-> Hiện tại chúng tôi chỉ có 1 enchant nên khu vực này tạm để trống. Sẽ được bổ sung sau.
+### 2) Smelting
+* **Mô tả:** Giúp nung và apply gia tài (nếu có) vào các loại khoáng sản được đào. CÓ HỖ TRỢ ORE CUSTOM TRONG CONFIG.
+* **File cấu hình:** `plugins/MoreEnchant/enchantments/smelting.yml`
+* **Tham số chính trong ví dụ:**
+
+  * `chance` — xác suất % để trigger luyện kim.
+  * `cooldown` — thời gian hồi giữa các lần trigger tính theo giây
+
+**Ví dụ:**
+
+```yaml
+# Cấu hình Smelting Enchantment
+levels:
+  I:
+    chance: 30.0 
+    cooldown: 0.2
+  II:
+    chance: 60.0
+    cooldown: 0.1
+  III:
+    chance: 100.0
+    cooldown: 0.0
+
+# Quặng vanilla được phép nung chảy
+vanilla_blocks:
+  IRON_ORE: true
+  DEEPSLATE_IRON_ORE: true
+  GOLD_ORE: true
+  DEEPSLATE_GOLD_ORE: true
+  COPPER_ORE: true
+  DEEPSLATE_COPPER_ORE: true
+  NETHER_GOLD_ORE: true
+  ANCIENT_DEBRIS: true
+
+# Quặng custom
+custom_blocks:
+  MYTHIC_ORES_SILVER_ORE:
+    raw_item: "MYTHIC_ORES_RAW_SILVER"
+    smelted_item: "MYTHIC_ORES_SILVER_INGOT"
+    fortune_applies: true
+```
+> ⚠️ Enchant luyện kim có áp dụng gia tài và give kinh nghiệm nên bạn hãy tính toán thật kỹ trước khi dùng.
+
 ---
+
 
 ## ✅ Tính năng chính
 
@@ -184,8 +226,9 @@ Mình rất hoan nghênh Pull Request và Issue! Vui lòng:
 1. Fork repository.
 2. Tạo branch feature/your-feature.
 3. Viết unit tests (nếu có thể) và giữ coding style thống nhất.
-4. Mở Pull Request mô tả rõ thay đổi.
-5. Nếu bạn contribute bằng code từ ChatGPT hoặc AI generated code, vui lòng ghi chú rõ phần nào là AI gen.
+4. Cất cái tôi đi, chuẩn bị sẵn sàng vì bạn có thể sẽ bị nhận xét.
+5. Mở Pull Request mô tả rõ thay đổi.
+6. Nếu bạn contribute bằng code từ ChatGPT hoặc AI generated code, vui lòng ghi chú rõ phần nào là AI gen.
 
 **Vui lòng mở issue để thảo luận trước khi bạn định làm 1 thay đổi lớn**
 

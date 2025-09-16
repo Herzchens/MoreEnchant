@@ -2,6 +2,7 @@ package com.herzchen.moreenchant.commands
 
 import com.herzchen.moreenchant.MoreEnchant
 import com.herzchen.moreenchant.utils.Helper
+
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender

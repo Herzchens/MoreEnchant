@@ -8,8 +8,13 @@ import com.herzchen.moreenchant.listener.BlockBreakListener
 import com.herzchen.moreenchant.listener.PlayerItemChangeListener
 import com.herzchen.moreenchant.manager.*
 import com.herzchen.moreenchant.utils.TabCompleter
+
 import org.bukkit.event.HandlerList
 import org.bukkit.plugin.java.JavaPlugin
+
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class MoreEnchant : JavaPlugin() {
     lateinit var configManager: ConfigManager
@@ -18,6 +23,10 @@ class MoreEnchant : JavaPlugin() {
     lateinit var extraStorageHook: ExtraStorageHook
     lateinit var bossBarManager: BossBarManager
     lateinit var performanceOptimizer: PerformanceOptimizer
+    lateinit var asyncExecutor: ExecutorService
+
+    lateinit var blockBreakListener: BlockBreakListener
+    lateinit var playerItemChangeListener: PlayerItemChangeListener
 
     var virtualExplosion: VirtualExplosion? = null
     var smelting: Smelting? = null
@@ -35,6 +44,7 @@ class MoreEnchant : JavaPlugin() {
     }
 
     override fun onEnable() {
+        asyncExecutor = Executors.newWorkStealingPool()
         configManager = ConfigManager(this)
         permissionManager = PermissionManager(this)
         enchantManager = EnchantManager()
@@ -53,8 +63,11 @@ class MoreEnchant : JavaPlugin() {
 
         performanceOptimizer = PerformanceOptimizer(this)
 
-        server.pluginManager.registerEvents(PlayerItemChangeListener(this), this)
-        server.pluginManager.registerEvents(BlockBreakListener(this), this)
+        playerItemChangeListener = PlayerItemChangeListener(this)
+        server.pluginManager.registerEvents(playerItemChangeListener, this)
+
+        blockBreakListener = BlockBreakListener(this)
+        server.pluginManager.registerEvents(blockBreakListener, this)
 
         getCommand("moe")?.setExecutor(MoeCommand(this))
         getCommand("moe")?.tabCompleter = TabCompleter(this)
@@ -78,7 +91,24 @@ class MoreEnchant : JavaPlugin() {
     }
 
     override fun onDisable() {
-        bossBarManager.removeAllBossBars()
+        if (::bossBarManager.isInitialized) {
+            bossBarManager.removeAllBossBars()
+        }
+
+        if (::blockBreakListener.isInitialized) {
+            blockBreakListener.shutdown()
+        }
+
+        if (::asyncExecutor.isInitialized) {
+            asyncExecutor.shutdown()
+            if (!asyncExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                asyncExecutor.shutdownNow()
+            }
+        }
+        if (!asyncExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+            asyncExecutor.shutdownNow()
+        }
+
         HandlerList.unregisterAll(this)
         art()
         this.server.consoleSender.sendMessage("§c================================================================================")

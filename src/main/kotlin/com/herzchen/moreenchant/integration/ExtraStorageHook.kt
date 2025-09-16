@@ -8,18 +8,30 @@ import org.bukkit.inventory.ItemStack
 
 import java.lang.reflect.Method
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 import kotlin.math.min
 
 class ExtraStorageHook(private val plugin: MoreEnchant) {
     private var storageAPI: Any? = null
-    private var getUserMethod: Method? = null
-    private var getStorageMethod: Method? = null
-    private var addItemMethod: Method? = null
     private var isEnabled = false
+
+    private val methodCache = ConcurrentHashMap<String, Method>()
 
     init {
         setupExtraStorageHook()
+    }
+
+    private fun getCachedMethod(className: String, methodName: String, vararg parameterTypes: Class<*>): Method? {
+        val cacheKey = "$className.$methodName.${parameterTypes.joinToString { it.simpleName }}"
+        return methodCache.getOrPut(cacheKey) {
+            try {
+                Class.forName(className).getMethod(methodName, *parameterTypes)
+            } catch (e: Exception) {
+                plugin.logger.warning("Failed to cache method $cacheKey: ${e.message}")
+                throw e
+            }
+        }
     }
 
     @Synchronized
@@ -27,14 +39,17 @@ class ExtraStorageHook(private val plugin: MoreEnchant) {
         if (!isEnabled) return null
 
         return try {
-            val user = getUserMethod!!.invoke(storageAPI, player.uniqueId) ?: return null
-            val storage = getStorageMethod!!.invoke(user) ?: return null
+            val getUser = getCachedMethod("me.hsgamer.extrastorage.api.StorageAPI", "getUser", UUID::class.java)
+            val user = getUser?.invoke(storageAPI, player.uniqueId) ?: return null
 
-            val getUsedSpaceMethod = storage.javaClass.getMethod("getUsedSpace")
-            val getSpaceMethod = storage.javaClass.getMethod("getSpace")
+            val getStorage = getCachedMethod("me.hsgamer.extrastorage.api.user.User", "getStorage")
+            val storage = getStorage?.invoke(user) ?: return null
 
-            val used = getUsedSpaceMethod.invoke(storage) as Long
-            val capacity = getSpaceMethod.invoke(storage) as Long
+            val getUsedSpace = getCachedMethod("me.hsgamer.extrastorage.api.storage.Storage", "getUsedSpace")
+            val getSpace = getCachedMethod("me.hsgamer.extrastorage.api.storage.Storage", "getSpace")
+
+            val used = getUsedSpace?.invoke(storage) as Long
+            val capacity = getSpace?.invoke(storage) as Long
 
             Pair(used, capacity)
         } catch (e: Exception) {
@@ -55,13 +70,12 @@ class ExtraStorageHook(private val plugin: MoreEnchant) {
             val getInstanceMethod = apiClass.getMethod("getInstance")
             storageAPI = getInstanceMethod.invoke(null)
 
-            getUserMethod = apiClass.getMethod("getUser", UUID::class.java)
-
-            val userClass = Class.forName("me.hsgamer.extrastorage.api.user.User")
-            getStorageMethod = userClass.getMethod("getStorage")
-
-            val storageClass = Class.forName("me.hsgamer.extrastorage.api.storage.Storage")
-            addItemMethod = storageClass.getMethod("add", Any::class.java, Long::class.java)
+            getCachedMethod("me.hsgamer.extrastorage.api.StorageAPI", "getUser", UUID::class.java)
+            getCachedMethod("me.hsgamer.extrastorage.api.user.User", "getStorage")
+            getCachedMethod("me.hsgamer.extrastorage.api.storage.Storage", "add", Any::class.java, Long::class.java)
+            getCachedMethod("me.hsgamer.extrastorage.api.storage.Storage", "getUsedSpace")
+            getCachedMethod("me.hsgamer.extrastorage.api.storage.Storage", "getSpace")
+            getCachedMethod("me.hsgamer.extrastorage.api.storage.Storage", "getStatus")
 
             isEnabled = true
             plugin.logger.info("Đã liên kết thành công với ExtraStorage API")
@@ -79,8 +93,11 @@ class ExtraStorageHook(private val plugin: MoreEnchant) {
         val failed = mutableListOf<ItemStack>()
 
         try {
-            val user = getUserMethod!!.invoke(storageAPI, player.uniqueId) ?: return Pair(emptyList(), items)
-            val storage = getStorageMethod!!.invoke(user) ?: return Pair(emptyList(), items)
+            val getUser = getCachedMethod("me.hsgamer.extrastorage.api.StorageAPI", "getUser", UUID::class.java)
+            val user = getUser?.invoke(storageAPI, player.uniqueId) ?: return Pair(emptyList(), items)
+
+            val getStorage = getCachedMethod("me.hsgamer.extrastorage.api.user.User", "getStorage")
+            val storage = getStorage?.invoke(user) ?: return Pair(emptyList(), items)
 
             val storageInfo = getStorageInfo(player)
             var remainingSpace = Long.MAX_VALUE
@@ -93,6 +110,8 @@ class ExtraStorageHook(private val plugin: MoreEnchant) {
                     return Pair(emptyList(), items)
                 }
             }
+
+            val addItem = getCachedMethod("me.hsgamer.extrastorage.api.storage.Storage", "add", Any::class.java, Long::class.java)
 
             for (item in items) {
                 if (remainingSpace <= 0) {
@@ -107,7 +126,7 @@ class ExtraStorageHook(private val plugin: MoreEnchant) {
                 }
 
                 if (amountToAdd > 0) {
-                    addItemMethod!!.invoke(storage, item.type, amountToAdd)
+                    addItem?.invoke(storage, item.type, amountToAdd)
                     successful.add(ItemStack(item.type, amountToAdd.toInt()))
 
                     if (remainingSpace != Long.MAX_VALUE) {
@@ -134,20 +153,22 @@ class ExtraStorageHook(private val plugin: MoreEnchant) {
         if (!isEnabled) return false
 
         return try {
-            val user = getUserMethod!!.invoke(storageAPI, player.uniqueId)
+            val getUser = getCachedMethod("me.hsgamer.extrastorage.api.StorageAPI", "getUser", UUID::class.java)
+            val user = getUser?.invoke(storageAPI, player.uniqueId)
             if (user == null) {
                 plugin.logger.warning("Lỗi lấy tên người chơi ${player.name}")
                 return false
             }
 
-            val storage = getStorageMethod!!.invoke(user)
+            val getStorage = getCachedMethod("me.hsgamer.extrastorage.api.user.User", "getStorage")
+            val storage = getStorage?.invoke(user)
             if (storage == null) {
                 plugin.logger.warning("Lỗi lấy kho cho người chơi ${player.name}")
                 return false
             }
 
-            val getStatusMethod = storage.javaClass.getMethod("getStatus")
-            getStatusMethod.invoke(storage) as Boolean
+            val getStatus = getCachedMethod("me.hsgamer.extrastorage.api.storage.Storage", "getStatus")
+            getStatus?.invoke(storage) as Boolean
         } catch (e: Exception) {
             plugin.logger.warning("Có lỗi xảy ra khi kiểm tra trạng thái bật/tắt: ${e.message}")
             false
@@ -165,4 +186,8 @@ class ExtraStorageHook(private val plugin: MoreEnchant) {
         } ?: false
     }
 
+    fun clearMethodCache() {
+        methodCache.clear()
+        plugin.logger.info("Method cache đã được xóa")
+    }
 }

@@ -1,6 +1,7 @@
 package com.herzchen.moreenchant.utils
 
 import org.bukkit.Material
+
 import kotlin.random.Random
 
 object ExperienceUtils {

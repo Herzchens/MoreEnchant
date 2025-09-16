@@ -1,6 +1,7 @@
 package com.herzchen.moreenchant.manager
 
 import com.herzchen.moreenchant.MoreEnchant
+
 import org.bukkit.entity.Player
 
 class PermissionManager(private val configManager: ConfigManager) {

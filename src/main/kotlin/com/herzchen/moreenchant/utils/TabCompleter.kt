@@ -1,6 +1,7 @@
 package com.herzchen.moreenchant.utils
 
 import com.herzchen.moreenchant.MoreEnchant
+
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabCompleter

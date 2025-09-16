@@ -4,12 +4,15 @@ import com.herzchen.moreenchant.MoreEnchant
 import com.herzchen.moreenchant.utils.ExperienceUtils
 import com.herzchen.moreenchant.utils.MaterialUtils
 import com.herzchen.moreenchant.utils.FortuneUtils
+
 import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+
 import java.io.File
+
 import kotlin.random.Random
 
 class Smelting(private val plugin: MoreEnchant) {

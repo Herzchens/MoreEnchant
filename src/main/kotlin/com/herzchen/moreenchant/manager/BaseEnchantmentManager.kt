@@ -1,11 +1,12 @@
 package com.herzchen.moreenchant.manager
 
-import org.bukkit.inventory.ItemStack
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+
 import org.bukkit.Material
+import org.bukkit.inventory.ItemStack
 
 open class BaseEnchantmentManager {
     protected val plainSerializer = PlainTextComponentSerializer.plainText()

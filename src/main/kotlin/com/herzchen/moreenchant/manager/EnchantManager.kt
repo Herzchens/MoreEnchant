@@ -1,6 +1,7 @@
 package com.herzchen.moreenchant.manager
 
 import net.kyori.adventure.text.format.NamedTextColor
+
 import org.bukkit.inventory.ItemStack
 
 class EnchantManager : BaseEnchantmentManager() {

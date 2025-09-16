@@ -2,7 +2,12 @@ package com.herzchen.moreenchant.utils
 
 import org.bukkit.Material
 
+import java.util.concurrent.ConcurrentHashMap
+
 object MaterialUtils {
+    private val materialColorCache = ConcurrentHashMap<Material, String>()
+    private val materialNameCache = ConcurrentHashMap<Material, String>()
+
     val materialColors = mapOf(
         Material.STONE to "§7",
         Material.COBBLESTONE to "§7",
@@ -77,12 +82,35 @@ object MaterialUtils {
         Material.ANCIENT_DEBRIS to "Mảnh Vỡ Cổ Đại"
     )
 
+    init {
+        materialColors.forEach { (material, color) ->
+            materialColorCache[material] = color
+        }
+        materialNames.forEach { (material, name) ->
+            materialNameCache[material] = name
+        }
+    }
+
     fun getMaterialColor(material: Material): String {
-        return materialColors[material] ?: "§f"
+        return materialColorCache.getOrPut(material) {
+            "§f"
+        }
     }
 
     fun getMaterialDisplayName(material: Material): String {
-        return materialNames[material] ?: material.name
+        return materialNameCache.getOrPut(material) {
+            material.name
+        }
     }
 
+    fun clearCache() {
+        materialColorCache.clear()
+        materialNameCache.clear()
+        materialColors.forEach { (material, color) ->
+            materialColorCache[material] = color
+        }
+        materialNames.forEach { (material, name) ->
+            materialNameCache[material] = name
+        }
+    }
 }

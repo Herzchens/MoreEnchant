@@ -1,14 +1,18 @@
 package com.herzchen.moreenchant.manager
 
 import com.herzchen.moreenchant.MoreEnchant
+
+import org.bukkit.Chunk
 import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 class PerformanceOptimizer(private val plugin: MoreEnchant) {
     private val itemCountCache = ConcurrentHashMap<UUID, Int>()
+    private val chunkItemCounts = ConcurrentHashMap<Chunk, AtomicInteger>()
 
     init {
         startScheduler()
@@ -16,22 +20,35 @@ class PerformanceOptimizer(private val plugin: MoreEnchant) {
 
     private fun startScheduler() {
         plugin.server.scheduler.runTaskTimer(plugin, Runnable {
-            for (player in plugin.server.onlinePlayers) {
-                val count = calculateNearbyItems(player)
-                itemCountCache[player.uniqueId] = count
+            for (world in plugin.server.worlds) {
+                for (chunk in world.loadedChunks) {
+                    updateChunkItemCount(chunk)
+                }
             }
-        }, 0L, 20L)
+        }, 0L, 200L)
     }
 
-    private fun calculateNearbyItems(player: Player): Int {
+    private fun updateChunkItemCount(chunk: Chunk) {
+        val count = chunkItemCounts.getOrPut(chunk) { AtomicInteger(0) }
+        count.set(chunk.entities.count { it is Item })
+    }
+
+    fun getNearbyItemCount(player: Player, radius: Int = plugin.configManager.checkRadius): Int {
         val location = player.location
-        val radius = plugin.configManager.checkRadius.toDouble()
-        return location.world?.getNearbyEntities(location, radius, radius, radius)
-            ?.count { it is Item } ?: 0
+        val chunks = mutableSetOf<Chunk>()
+        for (x in -radius..radius) for (z in -radius..radius) {
+            val chunkX = location.chunk.x + x
+            val chunkZ = location.chunk.z + z
+            val chunk = if (location.world.isChunkLoaded(chunkX, chunkZ)) {
+                location.world.getChunkAt(chunkX, chunkZ)
+            } else continue
+            chunks.add(chunk)
+        }
+        return chunks.sumOf { chunkItemCounts.getOrDefault(it, AtomicInteger(0)).get() }
     }
 
     fun getCachedItemCount(player: Player): Int {
-        return itemCountCache.getOrDefault(player.uniqueId, 0)
+        return itemCountCache.getOrDefault(player.uniqueId, getNearbyItemCount(player))
     }
 
     fun clearCache(playerId: UUID) {

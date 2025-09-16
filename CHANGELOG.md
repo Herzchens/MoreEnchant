@@ -129,4 +129,26 @@ Tất cả thay đổi quan trọng của dự án **MoreEnchant** sẽ được
 
 ---
 
+# <span style="color: #1e90ff;">[1.2.02] - 2025-09-15</span>
+
+- ### Sử dụng Alias Table để tăng hiệu suất
+- ### Bổ sung thêm việc trở về dùng binary search nếu như không dùng được Alias Table.
+- ### Thêm shutdown method và cache
+- ### Thêm các điều kiện để cải thiện độ an toàn
+- ### Chuyển từ lắng nghe vật phẩm sang lắng nghe chunk xung quanh. (Chunk-base indexing)
+- ### Cải thiện Precompute Probability Distribution
+- ### Thêm Transaction Queue
+- ### Thêm Cache reflection
+- ### Thêm Caffein Cache
+- ### Sửa lại dependencies của build.gradle.kts
+- ### Thêm Partial Reload
+- ### Chuyển một số phần từ main thread sang async task để tăng hiệu suất
+- ### Thêm parallel calculating
+
+# KHÔNG CÓ PERFORMANCE TEST ĐÂU ĐỪNG HỎI =)))
+- ### Đã test và cải thiện tốc độ tính toán random block nổ ảo
+- ### 1000000 block delay 3s lúc trước -> 1000000 block no delay
+- ### Fix việc tính toán nặng gây crash server (giờ chạy parellel thay vì làm treo server)
+
+## Tôi bị ngu, ý kiến ý cò gì thì mở issue
 

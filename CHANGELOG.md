@@ -66,13 +66,13 @@ Tất cả thay đổi quan trọng của dự án **MoreEnchant** sẽ được
 
 ## 📊 Ước tính Hiệu suất Tổng thể
 
-| Thành phần | Trước optimization | Sau optimization | Mức độ cải thiện |
-|------------|-------------------|------------------|------------------|
-| **Drop Calculation** | <span style="color: #ff4500;">O(n*m) per explosion</span> | <span style="color: #32cd32;">O(n log m) per explosion</span> | <span style="color: #32cd32;">**5-10x faster**</span> |
-| **Entity Lookups** | <span style="color: #ff4500;">O(n³) per block break</span> | <span style="color: #32cd32;">O(1) cached lookup</span> | <span style="color: #32cd32;">**20-50x reduction**</span> |
-| **Main Thread Load** | <span style="color: #ff4500;">70-80% CPU usage</span> | <span style="color: #32cd32;">30-40% CPU usage</span> | <span style="color: #32cd32;">**50-60% reduction**</span> |
-| **Memory Usage** | <span style="color: #ff4500;">High (frequent GC)</span> | <span style="color: #32cd32;">Moderate (stable)</span> | <span style="color: #32cd32;">**40-50% reduction**</span> |
-| **TPS Impact** | <span style="color: #ff4500;">15-18 TPS (under load)</span> | <span style="color: #32cd32;">19-20 TPS (stable)</span> | <span style="color: #32cd32;">**2-5 TPS improvement**</span> |
+| Thành phần           | Trước optimization                                          | Sau optimization                                              | Mức độ cải thiện                                             |
+|----------------------|-------------------------------------------------------------|---------------------------------------------------------------|--------------------------------------------------------------|
+| **Drop Calculation** | <span style="color: #ff4500;">O(n*m) per explosion</span>   | <span style="color: #32cd32;">O(n log m) per explosion</span> | <span style="color: #32cd32;">**5-10x faster**</span>        |
+| **Entity Lookups**   | <span style="color: #ff4500;">O(n³) per block break</span>  | <span style="color: #32cd32;">O(1) cached lookup</span>       | <span style="color: #32cd32;">**20-50x reduction**</span>    |
+| **Main Thread Load** | <span style="color: #ff4500;">70-80% CPU usage</span>       | <span style="color: #32cd32;">30-40% CPU usage</span>         | <span style="color: #32cd32;">**50-60% reduction**</span>    |
+| **Memory Usage**     | <span style="color: #ff4500;">High (frequent GC)</span>     | <span style="color: #32cd32;">Moderate (stable)</span>        | <span style="color: #32cd32;">**40-50% reduction**</span>    |
+| **TPS Impact**       | <span style="color: #ff4500;">15-18 TPS (under load)</span> | <span style="color: #32cd32;">19-20 TPS (stable)</span>       | <span style="color: #32cd32;">**2-5 TPS improvement**</span> |
 
 
 ## ⚡ Hiệu ứng Tổng hợp
@@ -116,3 +116,17 @@ Tất cả thay đổi quan trọng của dự án **MoreEnchant** sẽ được
 - ### <span style="color: #ff4500;">Fix lỗi tính gia tài cho mảnh vỡ cổ đại.</span>
 
 ---
+
+# <span style="color: #1e90ff;">[1.2.01] - 2025-09-15</span>
+
+- ### Thêm các lớp mới để cho code gọn hơn
+- ### Refactor lại code lần 5
+- ### Tái cấu trúc toàn bộ
+- ### Fix lỗi vặt liên quan tới Rainbow ASCII Art
+- ### Xoá WorldGuard hooking
+- ### Sửa lỗi bất đồng bộ hệ thống tính toán gia tài của enchant smelting
+- ### Fix một số chỗ bị duplicated
+
+---
+
+

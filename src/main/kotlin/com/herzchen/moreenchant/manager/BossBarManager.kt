@@ -31,4 +31,8 @@ class BossBarManager {
         bossBars.values.forEach { it.removeAll() }
         bossBars.clear()
     }
+
+    fun removePlayerBossBar(player: Player) {
+        bossBars.remove(player.uniqueId)?.removeAll()
+    }
 }

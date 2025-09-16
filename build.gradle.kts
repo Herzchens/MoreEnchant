@@ -16,6 +16,7 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
     implementation(kotlin("stdlib-jdk8"))
+    implementation("com.github.ben-manes.caffeine:caffeine:3.1.1")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {

@@ -1,5 +1,7 @@
 package com.herzchen.moreenchant.listener
 
+import com.github.benmanes.caffeine.cache.Caffeine
+
 import com.herzchen.moreenchant.MoreEnchant
 import com.herzchen.moreenchant.utils.ExperienceUtils
 
@@ -17,19 +19,61 @@ import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.*
 
 import kotlin.random.Random
 
 class BlockBreakListener(private val plugin: MoreEnchant) : Listener {
     private val enchantManager = plugin.enchantManager
-    private val cooldowns = ConcurrentHashMap<Pair<UUID, String>, Long>()
+
+    private val cooldowns = Caffeine.newBuilder()
+        .expireAfterWrite(10, TimeUnit.MINUTES)
+        .build<Pair<UUID, String>, Long>()
+
+    private val transactionQueues = ConcurrentHashMap<UUID, LinkedBlockingQueue<() -> Unit>>()
+    private val executor = Executors.newCachedThreadPool()
+
+    init {
+        startTransactionProcessor()
+    }
+
+    private fun startTransactionProcessor() {
+        executor.submit {
+            while (!Thread.currentThread().isInterrupted) {
+                transactionQueues.forEach { (uuid, queue) ->
+                    try {
+                        val operation = queue.poll(100, TimeUnit.MILLISECONDS)
+                        operation?.invoke()
+                    } catch (_: InterruptedException) {
+                        Thread.currentThread().interrupt()
+                        return@submit
+                    } catch (e: Exception) {
+                        plugin.logger.warning("Lỗi khi xử lý storage operation cho player $uuid: ${e.message}")
+                    }
+                }
+            }
+        }
+    }
+
+    fun enqueueStorageOperation(player: Player, operation: () -> Unit) {
+        val queue = transactionQueues.getOrPut(player.uniqueId) {
+            LinkedBlockingQueue()
+        }
+        try {
+            queue.put(operation)
+        } catch (_: InterruptedException) {
+            Thread.currentThread().interrupt()
+        }
+    }
 
     @EventHandler
     fun onPlayerQuit(event: PlayerQuitEvent) {
         val playerId = event.player.uniqueId
-        cooldowns.keys.removeAll { it.first == playerId }
+        cooldowns.asMap().keys.removeAll { it.first == playerId }
         plugin.performanceOptimizer.clearCache(playerId)
+        transactionQueues.remove(playerId)
+
+        plugin.bossBarManager.removePlayerBossBar(event.player)
     }
 
     @EventHandler
@@ -71,23 +115,30 @@ class BlockBreakListener(private val plugin: MoreEnchant) : Listener {
                     event.isCancelled = true
                     val (resultMaterial, amount) = smeltingResult
                     val exp = plugin.smelting!!.calculateSmeltingExperience(block.type)
+
                     if (hasAutoPickup) {
                         val smeltedItem = ItemStack(resultMaterial, amount)
-                        val (successfulItems, failedItems) = plugin.extraStorageHook.addToStorage(player, listOf(smeltedItem))
 
-                        if (successfulItems.isNotEmpty()) {
-                            plugin.smelting!!.showSmeltingResultMessage(player, resultMaterial, amount, exp)
-                        }
+                        enqueueStorageOperation(player) {
+                            plugin.server.scheduler.runTask(plugin, Runnable {
+                                val (successfulItems, failedItems) = plugin.extraStorageHook.addToStorage(player, listOf(smeltedItem))
 
-                        if (failedItems.isNotEmpty()) {
-                            failedItems.forEach { drop ->
-                                block.world.dropItemNaturally(block.location, drop)
-                            }
+                                if (successfulItems.isNotEmpty()) {
+                                    plugin.smelting!!.showSmeltingResultMessage(player, resultMaterial, amount, exp)
+                                }
+
+                                if (failedItems.isNotEmpty()) {
+                                    failedItems.forEach { drop ->
+                                        block.world.dropItemNaturally(block.location, drop)
+                                    }
+                                }
+                            })
                         }
                     } else {
                         block.world.dropItemNaturally(block.location, ItemStack(resultMaterial, amount))
                         plugin.smelting!!.showSmeltingResultMessage(player, resultMaterial, amount, exp)
                     }
+
                     if (exp > 0) {
                         player.giveExp(exp)
                     }
@@ -117,12 +168,7 @@ class BlockBreakListener(private val plugin: MoreEnchant) : Listener {
             return
         }
 
-        val cooldownKey = player.uniqueId to shapeKey
-        val lastUse = cooldowns[cooldownKey]
-        val currentTime = System.currentTimeMillis()
-        val cooldownMs = (shape.cooldown * 1000).toLong()
-
-        if (lastUse != null && currentTime - lastUse < cooldownMs) {
+        if (!checkCooldown(player, shapeKey)) {
             return
         }
 
@@ -130,26 +176,29 @@ class BlockBreakListener(private val plugin: MoreEnchant) : Listener {
 
         if (hasAutoPickup) {
             val originalDrops = block.getDrops(item).toList()
-            if (originalDrops.isNotEmpty()) {
-                val (_, failedItems) = plugin.extraStorageHook.addToStorage(player, originalDrops)
-                if (failedItems.isNotEmpty()) {
-                    failedItems.forEach { drop ->
-                        block.world.dropItemNaturally(block.location, drop)
-                    }
-                }
-            }
-
             val originalExp = calculateBlockExperience(block)
-            if (originalExp > 0) {
-                player.giveExp(originalExp)
+
+            enqueueStorageOperation(player) {
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    if (originalDrops.isNotEmpty()) {
+                        val (_, failedItems) = plugin.extraStorageHook.addToStorage(player, originalDrops)
+                        if (failedItems.isNotEmpty()) {
+                            failedItems.forEach { drop ->
+                                block.world.dropItemNaturally(block.location, drop)
+                            }
+                        }
+                    }
+
+                    if (originalExp > 0) {
+                        player.giveExp(originalExp)
+                    }
+                })
             }
 
             block.type = Material.AIR
         } else {
             block.breakNaturally(item)
         }
-
-        cooldowns[cooldownKey] = currentTime
 
         plugin.server.scheduler.runTask(plugin, Runnable {
             try {
@@ -159,6 +208,21 @@ class BlockBreakListener(private val plugin: MoreEnchant) : Listener {
                 e.printStackTrace()
             }
         })
+    }
+
+    private fun checkCooldown(player: Player, shapeKey: String): Boolean {
+        val cooldownKey = player.uniqueId to shapeKey
+        val lastUse = cooldowns.getIfPresent(cooldownKey)
+        val currentTime = System.currentTimeMillis()
+        val shape = plugin.configManager.getExplosionShape(shapeKey) ?: return false
+        val cooldownMs = (shape.cooldown * 1000).toLong()
+
+        return if (lastUse != null && currentTime - lastUse < cooldownMs) {
+            false
+        } else {
+            cooldowns.put(cooldownKey, currentTime)
+            true
+        }
     }
 
     private fun calculateBlockExperience(block: Block): Int {
@@ -172,5 +236,17 @@ class BlockBreakListener(private val plugin: MoreEnchant) : Listener {
         if (!hasAutoPickup) return true
 
         return !plugin.extraStorageHook.isStorageFull(player)
+    }
+
+    fun shutdown() {
+        executor.shutdown()
+        try {
+            if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+                executor.shutdownNow()
+            }
+        } catch (_: InterruptedException) {
+            executor.shutdownNow()
+            Thread.currentThread().interrupt()
+        }
     }
 }

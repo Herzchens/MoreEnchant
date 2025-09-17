@@ -208,7 +208,20 @@ class VirtualExplosion(private val plugin: MoreEnchant) {
     }
 
     private fun calculateExperience(material: Material): Int {
-        return ExperienceUtils.calculateBlockExperience(material) + ExperienceUtils.calculateOreExperience(material)
+        val blockExp = when (material) {
+            Material.DIAMOND -> ExperienceUtils.calculateBlockExperience(Material.DIAMOND_ORE)
+            Material.EMERALD -> ExperienceUtils.calculateBlockExperience(Material.EMERALD_ORE)
+            Material.COAL -> ExperienceUtils.calculateBlockExperience(Material.COAL_ORE)
+            Material.LAPIS_LAZULI -> ExperienceUtils.calculateBlockExperience(Material.LAPIS_ORE)
+            Material.REDSTONE -> ExperienceUtils.calculateBlockExperience(Material.REDSTONE_ORE)
+            Material.QUARTZ -> ExperienceUtils.calculateBlockExperience(Material.NETHER_QUARTZ_ORE)
+            Material.RAW_IRON -> ExperienceUtils.calculateOreExperience(Material.IRON_ORE)
+            Material.RAW_GOLD -> ExperienceUtils.calculateOreExperience(Material.GOLD_ORE)
+            Material.RAW_COPPER -> ExperienceUtils.calculateOreExperience(Material.COPPER_ORE)
+            Material.NETHERITE_SCRAP -> ExperienceUtils.calculateOreExperience(Material.ANCIENT_DEBRIS)
+            else -> 0
+        }
+        return blockExp
     }
 
     private fun dropItems(items: List<ItemStack>, location: Location) {

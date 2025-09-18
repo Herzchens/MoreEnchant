@@ -88,8 +88,26 @@ class ExtraStorageHook(private val plugin: MoreEnchant) {
     @Synchronized
     fun addToStorage(player: Player, items: List<ItemStack>): Pair<List<ItemStack>, List<ItemStack>> {
         if (!isEnabled) return Pair(emptyList(), items)
+
         if (hasUnlimitedStorage(player)) {
-            return Pair(items, emptyList())
+            try {
+                val getUser = getCachedMethod("me.hsgamer.extrastorage.api.StorageAPI", "getUser", UUID::class.java)
+                val user = getUser?.invoke(storageAPI, player.uniqueId) ?: return Pair(emptyList(), items)
+
+                val getStorage = getCachedMethod("me.hsgamer.extrastorage.api.user.User", "getStorage")
+                val storage = getStorage?.invoke(user) ?: return Pair(emptyList(), items)
+
+                val addItem = getCachedMethod("me.hsgamer.extrastorage.api.storage.Storage", "add", Any::class.java, Long::class.java)
+
+                items.forEach { item ->
+                    addItem?.invoke(storage, item.type, item.amount.toLong())
+                }
+
+                return Pair(items, emptyList())
+            } catch (e: Exception) {
+                plugin.logger.warning("Thêm vật phẩm thất bại (unlimited): ${e.message}")
+                return Pair(emptyList(), items)
+            }
         }
 
         val successful = mutableListOf<ItemStack>()
@@ -193,8 +211,6 @@ class ExtraStorageHook(private val plugin: MoreEnchant) {
             else used >= capacity
         } ?: false
     }
-
-
 
     fun clearMethodCache() {
         methodCache.clear()

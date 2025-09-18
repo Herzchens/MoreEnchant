@@ -44,28 +44,41 @@ MoreEnchant hướng tới việc làm cho hệ thống enchant trên server tr�
 **Ví dụ:**
 
 ```yaml
+# Cấu hình phạm vi
 explosion_shapes:
   I:
     width: 3
     height: 3
     depth: 1
-    chance: 30.0
-    cooldown: 1.0
+    chance: 30.0 # Tỷ lệ trigger nổ
+    cooldown: 1.0 # Giãn cách giữa các lần nổ
   II:
     width: 3
     height: 3
     depth: 3
     chance: 50.0
     cooldown: 0.5
-virtual_drops: # DropTable cho nổ ảo.
-  default: # Khi người chơi không có quyền nào của oregen
+  III:
+    width: 5
+    height: 3
+    depth: 5
+    chance: 70.0
+    cooldown: 0.2
+  IV:
+    width: 7
+    height: 5
+    depth: 7
+    chance: 90.0
+    cooldown: 0.1
+
+# Tỷ lệ vật phẩm theo permission
+virtual_drops:
+  default: # bảng drop khi người chơi không có bất cứ quyền gì
     drops:
-      STONE: 100.0 # 100% sẽ rơi ra đá
+      STONE: 100.0
       LAPIS_LAZULI: 100.0
-      REDSTONE: 100.0
-      GOLD_INGOT: 30.0 # 30% rơi ra thỏi vàng
-      IRON_INGOT: 36.3 # 36,3% tỷ lệ rơi ra thỏi sắt
-      DIAMOND: 100.0
+      REDSTONE: 50.0
+      GOLD_INGOT: 10.0
   oregen_level1:
     permission: "oregen.level.1"
     drops:
@@ -79,13 +92,32 @@ virtual_drops: # DropTable cho nổ ảo.
       DIAMOND_ORE: 3.0
       EMERALD_ORE: 1.0
 
-# Giới hạn số block tối đa 
+# Giới hạn số block tối đa để tính toán nổ ảo
 max_blocks: 1000
 
 # Cấu hình chống lag
 anti_lag:
-  max_nearby_items: 100 # Số lượng vật phẩm tối đa trước khi tạm dừng nổ ảo
-  check_radius: 10 # Phạm vi kiểm tra
+  max_nearby_items: 100
+  check_radius: 10
+
+block_whitelist: # Những block mà khi đào sẽ trigger nổ
+  - STONE
+  - COAL_ORE
+  - IRON_ORE
+  - GOLD_ORE
+  - DIAMOND_ORE
+  - EMERALD_ORE
+  - REDSTONE_ORE
+  - LAPIS_ORE
+  - NETHER_QUARTZ_ORE
+  - NETHER_GOLD_ORE
+  - DEEPSLATE_COAL_ORE
+  - DEEPSLATE_IRON_ORE
+  - DEEPSLATE_GOLD_ORE
+  - DEEPSLATE_DIAMOND_ORE
+  - DEEPSLATE_EMERALD_ORE
+  - DEEPSLATE_REDSTONE_ORE
+  - DEEPSLATE_LAPIS_ORE
 ```
 > ⚠️ Enchant nổ ảo có áp dụng gia tài và give kinh nghiệm nên bạn hãy tính toán thật kỹ trước khi dùng.
 

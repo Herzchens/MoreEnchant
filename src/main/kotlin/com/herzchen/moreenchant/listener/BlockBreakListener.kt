@@ -232,6 +232,10 @@ class BlockBreakListener(private val plugin: MoreEnchant) : Listener {
     private fun canPlayerBreakBlocks(player: Player): Boolean {
         if (!plugin.extraStorageHook.isAvailable()) return true
 
+        if (player.hasPermission("exstorage.storage.unlimited")) {
+            return true
+        }
+
         val hasAutoPickup = plugin.extraStorageHook.hasAutoPickup(player)
         if (!hasAutoPickup) return true
 

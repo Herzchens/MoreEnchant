@@ -272,6 +272,7 @@ class VirtualExplosion(private val plugin: MoreEnchant) {
 
     fun shouldPauseDueToStorage(player: Player): Boolean {
         if (!extraStorageHook.isAvailable()) return false
+        if (player.hasPermission("exstorage.storage.unlimited")) return false
 
         val hasAutoPickup = extraStorageHook.hasAutoPickup(player)
         if (!hasAutoPickup) return false

@@ -57,10 +57,12 @@ class PlayerItemChangeListener(private val plugin: MoreEnchant) : Listener {
                     plugin.extraStorageHook.isStorageFull(player)
 
             if (shouldPauseDueToStorage) {
-                plugin.bossBarManager.showBossBar(player,
-                    "§cKho đã đầy! Không thể đập thêm khối.",
-                    org.bukkit.boss.BarColor.RED)
-                return
+                if (!player.hasPermission("exstorage.storage.unlimited")) {
+                    plugin.bossBarManager.showBossBar(player,
+                        "§cKho đã đầy! Không thể đập thêm khối.",
+                        org.bukkit.boss.BarColor.RED)
+                    return
+                }
             }
 
             val isPaused = if (plugin.virtualExplosion != null) {

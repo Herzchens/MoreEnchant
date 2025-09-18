@@ -88,6 +88,9 @@ class ExtraStorageHook(private val plugin: MoreEnchant) {
     @Synchronized
     fun addToStorage(player: Player, items: List<ItemStack>): Pair<List<ItemStack>, List<ItemStack>> {
         if (!isEnabled) return Pair(emptyList(), items)
+        if (hasUnlimitedStorage(player)) {
+            return Pair(items, emptyList())
+        }
 
         val successful = mutableListOf<ItemStack>()
         val failed = mutableListOf<ItemStack>()
@@ -175,9 +178,14 @@ class ExtraStorageHook(private val plugin: MoreEnchant) {
         }
     }
 
+    private fun hasUnlimitedStorage(player: Player): Boolean {
+        return player.hasPermission("exstorage.storage.unlimited")
+    }
+
     @Synchronized
     fun isStorageFull(player: Player): Boolean {
         if (!isEnabled) return false
+        if (hasUnlimitedStorage(player)) return false
 
         val storageInfo = getStorageInfo(player)
         return storageInfo?.let { (used, capacity) ->
@@ -185,6 +193,8 @@ class ExtraStorageHook(private val plugin: MoreEnchant) {
             else used >= capacity
         } ?: false
     }
+
+
 
     fun clearMethodCache() {
         methodCache.clear()
